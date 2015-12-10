@@ -1,0 +1,68 @@
+#
+# Author: Csaszar, Peter <csjpeter@gmail.com>
+# Copyright (C) 2015 Csaszar, Peter
+#
+
+Name "@PKGNAME_BASE@"
+LicenseData "license.txt"
+Icon "../@TCROOT@@PREFIX@share/pixmaps/@PKGNAME_BASE@.ico"
+outFile "@PKGNAME_BASE@-installer.exe"
+installDir $PROGRAMFILES\@PREFIX@
+
+!define REG_FOLDER "Software\Microsoft\Windows\CurrentVersion\Uninstall\@AUTHOR@ @PKGNAME_BASE@"
+!define ICON "$INSTDIR\share\pixmaps\@PKGNAME_BASE@.ico"
+!define SMFOLDER "$SMPROGRAMS\@PKGNAME_BASE@"
+
+# For removing Start Menu shortcut in Windows 7
+RequestExecutionLevel user
+
+!include LogicLib.nsh
+
+page license
+page directory
+Page instfiles
+
+section
+setOutPath $INSTDIR
+file /r /x "*debug*" "../@TCROOT@@PREFIX@/*"
+writeUninstaller "$INSTDIR\uninstall.exe"
+createDirectory "${SMFOLDER}"
+createShortCut "${SMFOLDER}\uninstall.lnk" "$INSTDIR\uninstall.exe"
+createShortCut "${SMFOLDER}\@PKGNAME_BASE@.lnk" "$INSTDIR\bin\@PKGNAME_BASE@.exe" "" "${ICON}" 0
+createShortCut "$DESKTOP\@PKGNAME_BASE@.lnk" "$INSTDIR\bin\@PKGNAME_BASE@.exe" "" "${ICON}" 0
+
+WriteRegStr HKLM "${REG_FOLDER}" "DisplayName" "@AUTHOR@ - @PRJDESC@"
+WriteRegStr HKLM "${REG_FOLDER}" "UninstallString" "$\"$INSTDIR\uninstall.exe$\""
+WriteRegStr HKLM "${REG_FOLDER}" "QuietUninstallString" "$\"$INSTDIR\uninstall.exe$\" /S"
+WriteRegStr HKLM "${REG_FOLDER}" "InstallLocation" "$\"$INSTDIR$\""
+WriteRegStr HKLM "${REG_FOLDER}" "DisplayIcon" "$\"$INSTDIR\logo.ico$\""
+WriteRegStr HKLM "${REG_FOLDER}" "Publisher" "$\"@AUTHOR@$\""
+WriteRegStr HKLM "${REG_FOLDER}" "HelpLink" "$\"@EMAIL@$\""
+WriteRegStr HKLM "${REG_FOLDER}" "URLUpdateInfo" "$\"$\""
+WriteRegStr HKLM "${REG_FOLDER}" "URLInfoAbout" "$\"$\""
+WriteRegStr HKLM "${REG_FOLDER}" "DisplayVersion" "$\"@VERSION@$\""
+WriteRegDWORD HKLM "${REG_FOLDER}" "VersionMajor" @VERSION_MAJOR@
+WriteRegDWORD HKLM "${REG_FOLDER}" "VersionMinor" @VERSION_MINOR@
+WriteRegDWORD HKLM "${REG_FOLDER}" "NoModify" 1
+WriteRegDWORD HKLM "${REG_FOLDER}" "NoRepair" 1
+WriteRegDWORD HKLM "${REG_FOLDER}" "EstimatedSize" 20000
+sectionEnd
+
+function un.onInit
+SetShellVarContext all
+MessageBox MB_OKCANCEL "Permanantly remove @PKGNAME_BASE@?" IDOK next
+Abort
+next:
+functionEnd
+
+section "uninstall"
+delete "$INSTDIR\uninstall.exe"
+rmdir /r "$INSTDIR"
+delete "${SMFOLDER}\@PKGNAME_BASE@.lnk"
+delete "${SMFOLDER}\uninstall.lnk"
+delete "$DESKTOP\@PKGNAME_BASE@.lnk"
+rmDir "${SMFOLDER}"
+
+DeleteRegKey HKLM "${REG_FOLDER}"
+sectionEnd
+

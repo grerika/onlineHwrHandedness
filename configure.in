@@ -1,0 +1,241 @@
+#!/bin/bash
+
+#
+#       Author: Peter Csaszar <csjpeter@gmail.com>
+#       Copyright (C) 2015 Peter Csaszar
+#
+
+source config
+
+PKGNAME=@PKGNAME@
+ENDUSER_LICENSE="$(cat enduser-license | sed 's|$|\\\\n\\\\\\|g')"
+
+DEBUG=no
+
+# param 1 : inflie
+# param 2 : outfile
+function generate ()
+{
+	cat $1 | sed \
+		-e "s|@PREFIX@|${PREFIX}|g" \
+		-e "s|@TCROOT@|${TCROOT}|g" \
+		-e "s|@INCLUDES@|${INCLUDES}|g" \
+		-e "s|@CFLAGS@|${CFLAGS}|g" \
+		-e "s|@LDFLAGS@|${LDFLAGS}|g" \
+		-e "s|@LIBS@|${LIBS}|g" \
+		-e "s|@STATICS@|${STATICS}|g" \
+		-e "s|@CXX@|${CXX}|g" \
+		-e "s|@CC@|${CC}|g" \
+		-e "s|@CPP@|${CPP}|g" \
+		-e "s|@LD@|${LD}|g" \
+		-e "s|@STRIP@|${STRIP}|g" \
+		-e "s|@RANLIB@|${RANLIB}|g" \
+		-e "s|@OBJCOPY@|${OBJCOPY}|g" \
+		-e "s|@MOC@|${MOC}|g" \
+		-e "s|@DOC_DIR@|${DOC_DIR}|g" \
+		-e "s|@PKGCONFIG@|${PKGCONFIG}|g" \
+		-e "s|@CONFIG@|${CONFIG}|g" \
+		-e "s|@MAN_DIR@|${MAN_DIR}|g" \
+		-e "s|@APPS_DIR@|${APPS_DIR}|g" \
+		-e "s|@ICONS_PREFIX@|${ICONS_PREFIX}|g" \
+		-e "s|@CSS_PREFIX@|${CSS_PREFIX}|g" \
+		-e "s|@TRANSLATIONS_PREFIX@|${TRANSLATIONS_PREFIX}|g" \
+                -e "s|@ENDUSER_LICENSE@|\"${ENDUSER_LICENSE}\n\"|g" \
+		> $2 || exit $?
+}
+
+function process_args ()
+{
+	while ! test "x$1" = "x"; do
+		KEY=$(echo $1 | sed 's|=.*||g')
+		VALUE=$(echo $1 | sed 's|.*=||g')
+
+		case ${KEY} in
+			(--build)
+				! test "x${VALUE}" = "x" || {
+					echo "Missing build architecture value."
+					exit $?
+				}
+				BUILD_ARCH="${VALUE}"
+			;;
+			(--host)
+				! test "x${VALUE}" = "x" || {
+					echo "Missing host architecture value."
+					exit $?
+				}
+				HOST_ARCH="${VALUE}"
+			;;
+			(--target)
+				! test "x${VALUE}" = "x" || {
+					echo "Missing target architecture value."
+					exit $?
+				}
+				TARGET_ARCH="${VALUE}"
+			;;
+			(--prefix)
+				PREFIX=$(echo ${VALUE} | sed 's|^/*||g')
+				prefix=$PREFIX # dh_auto_configure compatibility
+			;;
+			(--translations-prefix)
+				TRANSLATIONS_PREFIX=${VALUE}
+			;;
+			(--css-prefix)
+				CSS_PREFIX=${VALUE}
+			;;
+			(--icons-prefix)
+				ICONS_PREFIX=${VALUE}
+			;;
+			(--tcroot)
+				TCROOT="${VALUE}"
+			;;
+			(--debug)
+				CFLAGS="${CFLAGS} -fno-builtin -O0 -g3 -ggdb3"
+				#-DDEBUG"
+				DEBUG=yes
+			;;
+			(--relative-path)
+				CFLAGS="${CFLAGS} -DRELATIVE_PATH"
+			;;
+			(--gnu-source)
+				CFLAGS="${CFLAGS} -D_GNU_SOURCE"
+			;;
+			(--non-gnu-source)
+				CFLAGS="${CFLAGS} -U_GNU_SOURCE"
+			;;
+			(--fpic)
+				CFLAGS="${CFLAGS} -fPIC"
+			;;
+			(--static)
+				CONFIG="${CONFIG} staticbuild"
+			;;
+			(--perfmode)
+				CFLAGS="${CFLAGS} -DPERFMODE"
+			;;
+			(--libs)
+				LIBS="${LIBS} ${VALUE}"
+			;;
+			(--cflags)
+				CFLAGS="${CFLAGS} ${VALUE}"
+			;;
+			(--ldflags)
+				LDFLAGS="${LDFLAGS} ${VALUE}"
+			;;
+			(--pkg-config-path)
+				export PKG_CONFIG_PATH="${PKG_CONFIG_PATH}:${VALUE}"
+			;;
+			(--includedir)
+			        INCLUDE_DIR=$(eval echo ${VALUE} | sed 's|^/*||g')
+			;;
+			(--mandir)
+			        MAN_DIR=$(eval echo ${VALUE} | sed 's|^/*||g')
+			;;
+			(--infodir)
+			        INFO_DIR=$(eval echo ${VALUE} | sed 's|^/*||g')
+			;;
+			(--sysconfdir)
+			        SYSCONF_DIR=$(eval echo ${VALUE} | sed 's|^/*||g')
+			;;
+			(--localstatedir)
+			        LOCALSTATE_DIR=$(eval echo ${VALUE} | sed 's|^/*||g')
+			;;
+			(--libexecdir)
+			        LIBEXEC_DIR=$(eval echo ${VALUE} | sed 's|^/*||g')
+			;;
+			(--appsdir)
+			        APPS_DIR=$(eval echo ${VALUE} | sed 's|^/*||g')
+			;;
+			# Some option we want to accept but do nothing for them
+			(--disable-maintainer-mode)
+			;;
+			(--disable-dependency-tracking)
+			;;
+			(*)
+				echo "Invalid argument ($1) found on command line."
+				exit 1
+			;;
+		esac
+		shift
+	done
+}
+
+process_args --prefix=usr
+process_args @PRECONFIGURATION@
+process_args $@
+
+! test ${DEBUG} = "no" || { CFLAGS="${CFLAGS} -O2" ; }
+
+CFLAGS="${CFLAGS} -Werror -Wall -Wextra -MMD -std=c++0x -D_ISOC99_SOURCE"
+
+! test "x${HOST_ARCH}" = "x" || { HOST_ARCH=${BUILD_ARCH} ; }
+! test "x${TARGET_ARCH}" = "x" || { TARGET_ARCH=${HOST_ARCH} ; }
+
+test "x${TARGET_ARCH}" = "x${HOST_ARCH}" && {
+	CXX=g++
+	CC=cc
+	CPP=cpp
+	LD=ld
+	STRIP=strip
+	OBJCOPY=objcopy
+	MOC=moc
+	RANLIB=ranlib
+	PKGCONFIG=pkg-config
+} || {
+	CXX=${TARGET_ARCH}-g++
+	CC=${TARGET_ARCH}-cc
+	CPP=${TARGET_ARCH}-cpp
+	LD=${TARGET_ARCH}-ld
+	STRIP=${TARGET_ARCH}-strip
+	OBJCOPY=${TARGET_ARCH}-objcopy
+	MOC=${TARGET_ARCH}-moc
+	RANLIB=${TARGET_ARCH}-ranlib
+	PKGCONFIG=${TARGET_ARCH}-pkg-config
+}
+
+#CFLAGS="${CFLAGS} $(${PKGCONFIG} --cflags QtCore)"
+#CFLAGS="${CFLAGS} $(${PKGCONFIG} --cflags Qt5Sql)" || exit $?
+CFLAGS="${CFLAGS} $(${PKGCONFIG} --cflags Qt5Gui)" || exit $?
+CFLAGS="${CFLAGS} $(${PKGCONFIG} --cflags Qt5Widgets)" || exit $?
+echo "${CONFIG}" | grep staticbuild > /dev/null && {
+#	STATICS+="${STATICS} $(${PKGCONFIG} --static --libs QtCore)" || exit $?
+#	STATICS+="${STATICS} $(${PKGCONFIG} --static --libs Qt5Sql)" || exit $?
+	STATICS+="${STATICS} $(${PKGCONFIG} --static --libs Qt5Gui)" || exit $?
+	STATICS+="${STATICS} $(${PKGCONFIG} --static --libs Qt5Widgets)" || exit $?
+} || {
+#	LIBS+="${LIBS} $(${PKGCONFIG} --libs QtCore)" || exit $?
+#	LIBS+="${LIBS} $(${PKGCONFIG} --libs Qt5Sql)" || exit $?
+	LIBS+="${LIBS} $(${PKGCONFIG} --libs Qt5Gui)" || exit $?
+	LIBS+="${LIBS} $(${PKGCONFIG} --libs Qt5Widgets)" || exit $?
+}
+
+LDFLAGS="${LDFLAGS} -Wl,--as-needed -rdynamic"
+
+INCLUDES=-Isrc
+
+# Adjusting PREFIX and TCROOT if non-empty
+test "x${PREFIX}" = "x" || { PREFIX="${PREFIX}/" ; }
+test "x${TCROOT}" = "x" || { TCROOT="${TCROOT}/" ; }
+test "x${ICONS_PREFIX}" = "x" && { ICONS_PREFIX=${PREFIX} ; }
+test "x${CSS_PREFIX}" = "x" && { CSS_PREFIX=${PREFIX} ; }
+test "x${TRANSLATIONS_PREFIX}" = "x" && { TRANSLATIONS_PREFIX=${PREFIX} ; }
+
+test "x${INCLUDE_DIR}" = "x" && { INCLUDE_DIR=${PREFIX}include ; }
+test "x${MAN_DIR}" = "x" && { MAN_DIR=${PREFIX}share/man ; }
+test "x${INFO_DIR}" = "x" && { INFO_DIR=${PREFIX}share/info ; }
+test "x${SYSCONF_DIR}" = "x" && { SYSCONF_DIR=etc ; }
+test "x${LOCALSTATE_DIR}" = "x" && { LOCALSTATE_DIR=var ; }
+test "x${LIBEXEC_DIR}" = "x" && { LIBEXEC_DIR=${PREFIX}lib ; }
+test "x${APPS_DIR}" = "x" && { APPS_DIR=${PREFIX}share/applications ; }
+
+DOC_DIR=${PREFIX}share/doc/${PKGNAME}
+
+echo "Configuring files..."
+for f in $(find . -name \*\.in); do
+	F=$(echo $f | sed 's|\.in$||g')
+	# dont regenerate config.h if it already exists
+	echo $F | grep -q "config\.h$" && test -f $F && continue;
+	echo $F
+	generate $f $F || exit $?
+	! echo $F | grep -q "\.sh$" || { chmod u+x $F || exit $? ; }
+done
+echo "Configure done"
+

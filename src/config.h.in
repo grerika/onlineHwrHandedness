@@ -1,0 +1,20 @@
+/*
+ * Author: Csaszar, Peter <csjpeter@gmail.com>
+ * Copyright (C) 2015 Csaszar, Peter
+ */
+
+#define AUTHOR "@AUTHOR@"
+#define EMAIL "@EMAIL@"
+#define VERSION "@VERSION@"
+#define PREFIX "@PREFIX@"
+#define PRJNAME "@PRJNAME@"
+#define PKGNAME "@PKGNAME@"
+#define ORGANIZATION "@ORGANIZATION@"
+#define ORGANIZATION_DOMAIN_NAME "@ORGANIZATION_DOMAIN_NAME@"
+
+#define ICONS_PATH "@ICONS_PREFIX@share/@PKGNAME_BASE@/icons/"
+#define CSS_PATH "@CSS_PREFIX@share/@PKGNAME_BASE@/css/"
+#define TRANSLATIONS_PATH "@TRANSLATIONS_PREFIX@share/@PKGNAME_BASE@/translations/"
+
+#define ENDUSER_LICENSE @ENDUSER_LICENSE@
+

@@ -1,0 +1,224 @@
+#
+#	Author: Peter Csaszar <csjpeter@gmail.com>
+#	Copyright (C) 2015 Peter Csaszar
+#
+
+# We dont want to use built in rules. Those are ineffective and we
+# can never know all of them, thus those can be unexpected as well.
+
+.SUFFIXES:
+
+MAKEFLAGS += --no-builtin-rules --no-builtin-variables
+EMPTY=
+COMMA=,
+SPACE=$(EMPTY) $(EMPTY)
+SHELL=bash
+
+#
+#	Configuration part
+#
+
+CFLAGS=@CFLAGS@
+LDFLAGS=@LDFLAGS@
+LIBS=@LIBS@
+STATICS=@STATICS@
+INCLUDES=@INCLUDES@
+CC=@CC@
+CXX=@CXX@
+CPP=@CPP@
+LD=@LD@
+STRIP=@STRIP@
+OBJCOPY=@OBJCOPY@
+MOC=@MOC@
+RANLIB=@RANLIB@
+PKGCONFIG=@PKGCONFIG@
+
+#
+# some tool
+#
+
+#cpp -dM /dev/null
+TIME=/usr/bin/time -f "\t%E real,\t%U user,\t%S sys,\t%M mem\t$<" -a -o time-stat.log
+COMPILE=$(CXX) -c $(CFLAGS) $(INCLUDES)
+LINK=$(CXX) $(LDFLAGS) $^ $(STATICS) $(LIBS) -o $@
+LINK_DYNAMIC=$(CXX) -shared -Wl,-as-needed -Bdynamic $(LDFLAGS) $^ $(STATICS) $(LIBS) \
+		-Wl,-soname,$(basename $(notdir $@)) -o $@
+LINK_STATIC=ar cqs $@ $^
+
+TESTDIR=tmp/@PKGNAME@/test/
+
+tmp/src/qt/moc/%.opp: tmp/src/qt/moc/%.cpp
+	@test -d $(dir $@) || mkdir -p $(dir $@)
+	$(TIME) $(COMPILE) $(SQL_INCLUDES) $(HANDEDNESS_INCLUDES) -o $@ $<
+
+tmp/src/qt/moc/%.cpp: src/qt/%.h
+	@test -d $(dir $@) || mkdir -p $(dir $@)
+	$(MOC) -o $@ $<
+	@touch $@
+
+tmp/src/test/%.opp: src/test/%.cpp
+	@test -d $(dir $@) || mkdir -p $(dir $@)
+	$(TIME) $(COMPILE) $(SQL_INCLUDES) -DTESTDIR=\"$(TESTDIR)\" -o $@ $<
+
+
+tmp/src/test/%.opp: src/test/%.cpp
+	        @test -d $(dir $@) || mkdir -p $(dir $@)
+		        $(TIME) $(COMPILE) $(SQL_INCLUDES) -DTESTDIR=\"$(TESTDIR)\" -o $@ $<
+
+tmp/src/qt/%.opp: src/qt/%.cpp
+	        @test -d $(dir $@) || mkdir -p $(dir $@)
+		        $(TIME) $(COMPILE) $(SQL_INCLUDES) -o $@ $<
+
+tmp/src/%.opp: src/%.cpp
+	        @test -d $(dir $@) || mkdir -p $(dir $@)
+		        $(TIME) $(COMPILE) $(SQL_INCLUDES) -o $@ $<
+
+@TCROOT@@PREFIX@include/@PKGNAME@/%.h: src/%.h
+	@test -d $(dir $@) || mkdir -p $(dir $@)
+	cp -pd $< $@
+
+@TCROOT@@PREFIX@lib/% : \
+		tmp/@TCROOT@@PREFIX@lib/%
+	@test -d $(dir $@) || mkdir -p $(dir $@)
+	cp $^ $@
+	$(STRIP) --remove-section=.comment --remove-section=.note --strip-unneeded $@
+
+@TCROOT@@PREFIX@lib/debug/@TCROOT@@PREFIX@lib/% : \
+		tmp/@TCROOT@@PREFIX@lib/%
+	@test -d $(dir $@) || mkdir -p $(dir $@)
+	$(OBJCOPY) --only-keep-debug $^ $@
+
+@TCROOT@@PREFIX@bin/%-dbg : \
+		tmp/@TCROOT@@PREFIX@bin/%
+	@test -d $(dir $@) || mkdir -p $(dir $@)
+	cp $^ $@
+
+@TCROOT@@PREFIX@bin/% : \
+		tmp/@TCROOT@@PREFIX@bin/%
+	@test -d $(dir $@) || mkdir -p $(dir $@)
+	cp $^ $@
+	$(STRIP) --remove-section=.comment --remove-section=.note --strip-unneeded $@
+
+@TCROOT@@PREFIX@lib/debug/@TCROOT@@PREFIX@bin/% : \
+		tmp/@TCROOT@@PREFIX@bin/%
+	@test -d $(dir $@) || mkdir -p $(dir $@)
+	$(OBJCOPY) --only-keep-debug $^ $@
+
+#
+# build goals
+#
+
+TEST_BINARIES=\
+#	tmp/bin/test-@PKGNAME_BASE@-@EXEC_POSTFIX@
+
+#
+# temporary files
+#
+
+SQL_INCLUDES=
+
+HANDEDNESS_OBJECTS+= \
+	\
+	tmp/src/h_texts.opp \
+	\
+	tmp/src/h_config.opp \
+	\
+	tmp/src/qt/h_mainview.opp \
+	tmp/src/qt/moc/h_mainview.opp \
+	\
+	tmp/src/qt/h_application.opp \
+	tmp/src/qt/moc/h_application.opp \
+	\
+	tmp/src/qt/main.opp
+
+HANDEDNESS_INCLUDES=-Isrc/qt
+
+.PRECIOUS: $(HANDEDNESS_OBJECTS)
+
+.SECONDARY: $(HANDEDNESS_OBJECTS)
+
+IMAGES+=\
+	$(ICONS_DIR)/copyright \
+	$(ICONS_DIR)/handedness.png
+
+#
+# main rules
+#
+
+run:
+	@TCROOT@@PREFIX@bin/@PKGNAME_BASE@@EXEC_POSTFIX@
+
+debug:
+	gdb @TCROOT@@PREFIX@bin/@PKGNAME_BASE@@EXEC_POSTFIX@-dbg
+
+build: \
+	$(IMAGES) \
+	$(BUILD_DEPS) \
+	$(TRANSLATIONS_DIR)/en.qm \
+	$(TRANSLATIONS_DIR)/hu.qm
+
+clean:
+	test "x" = "x$(shell find . | grep \\~$$)" || rm $(shell find . | grep \\~$$)
+	test "x" = "x$(shell find . | grep \\.swp$$)" || rm $(shell find . | grep \\.swp$$)
+	test "x" = "x$(shell find . | grep \\.log$$)" || rm $(shell find . | grep \\.log$$)
+	! test -d tmp || rm -fr tmp
+	! test -d @TCROOT@@PREFIX@bin || rm -fr @TCROOT@@PREFIX@bin
+	! test -d @TCROOT@@PREFIX@lib || rm -fr @TCROOT@@PREFIX@lib
+	! test -d @TCROOT@@PREFIX@share || rm -fr @TCROOT@@PREFIX@share
+	! test -d @TCROOT@@PREFIX@test || rm -fr @TCROOT@@PREFIX@test
+	! test -d @TCROOT@@PREFIX@include || rm -fr @TCROOT@@PREFIX@include
+	test "x" = "x@TCROOT@@PREFIX@" || { ! test -d @TCROOT@@PREFIX@ || rmdir @TCROOT@@PREFIX@ ; }
+	! test -e Makefile || rm Makefile
+
+install: build
+	test -d $(DESTDIR) || mkdir -p $(DESTDIR)
+	test -d $(DESTDIR)/@PREFIX@ || mkdir -p $(DESTDIR)/@PREFIX@
+	cp -pdr @TCROOT@@PREFIX@share $(DESTDIR)/@PREFIX@share
+	cp -pdr @TCROOT@@PREFIX@bin $(DESTDIR)/@PREFIX@bin
+
+check: $(TEST_BINARIES)
+	@let RET=0; \
+	mkdir -p $(TESTDIR); \
+	for t in $(TEST_BINARIES); do \
+		$$t || let RET=$$?; \
+	done; \
+	test $$RET -eq 0 || { \
+		echo -e "\e[31m"; \
+		echo "There was some failure during testing !"; \
+		echo -e "\e[0m"; \
+		false ; \
+	}
+
+FORCE:
+
+#
+#	build rules
+#
+
+tmp/@TCROOT@@PREFIX@lib/lib@PKGNAME_BASE@.so: \
+		$(HANDEDNESS_OBJECTS)
+	@test -d $(dir $@) || mkdir -p $(dir $@)
+	$(LINK_DYNAMIC)
+
+tmp/@TCROOT@@PREFIX@bin/@PKGNAME_BASE@@EXEC_POSTFIX@: \
+		$(HANDEDNESS_OBJECTS)
+	test -d $(dir $@) || mkdir -p $(dir $@)
+	$(LINK)
+
+$(ICONS_DIR)/%.png: \
+		share/icons/%.png
+	@test -d $(dir $@) || mkdir -p $(dir $@)
+	cp $< $@
+
+$(TRANSLATIONS_DIR)/%.qm: \
+		share/translations/%.qm
+	@test -d $(dir $@) || mkdir -p $(dir $@)
+	cp $< $@
+
+$(ICONS_DIR)/copyright: \
+		share/icons/copyright
+	@test -d $(dir $@) || mkdir -p $(dir $@)
+	cp $< $@
+
+-include $(HANDEDNESS_OBJECTS:.opp=.d)
+

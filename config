@@ -1,0 +1,24 @@
+#!/bin/bash
+
+PRJNAME=onlineHwrHandedness
+
+VERSION_MAJOR=0
+VERSION_MINOR=1
+VERSION_PATCH=0
+VERSION_API=${VERSION_MAJOR}.${VERSION_MINOR}
+VERSION=${VERSION_API}.${VERSION_PATCH}
+
+#PKGNAME_BASE=${PRJNAME}_${VERSION_MAJOR}_${VERSION_MINOR}
+PKGNAME_BASE=${PRJNAME}${VERSION_API}
+
+PRJDESC="Online Handwriting Handedness - handwrite analytics."
+PRJDESCRIPTION=" Handwrite analytics\
+ tool."
+
+DEVELOPMENT_START_YEAR=2015
+
+AUTHOR="Császár Péter && Griechisch Erika"
+EMAIL=csjpeter@gmail.com
+ORGANIZATION="Peter Csaszar"
+ORGANIZATION_DOMAIN_NAME="csjpeter.eu"
+

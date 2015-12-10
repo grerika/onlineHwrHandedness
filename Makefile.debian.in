@@ -1,0 +1,33 @@
+#
+#	Author: Peter Csaszar <csjpeter@gmail.com>
+#	Copyright (C) 2015 Peter Csaszar
+#
+
+ICONS_DIR=@TCROOT@@PREFIX@share/@PKGNAME_BASE@/icons
+CSS_DIR=@TCROOT@@PREFIX@share/@PKGNAME_BASE@/css
+TRANSLATIONS_DIR=@TCROOT@@PREFIX@share/@PKGNAME_BASE@/translations
+
+IMAGES+=\
+	@TCROOT@@PREFIX@share/pixmaps/@PKGNAME_BASE@.png
+
+BUILD_DEPS+=\
+	@TCROOT@@APPS_DIR@/@PKGNAME_BASE@.desktop \
+	@TCROOT@@PREFIX@lib/debug/@TCROOT@@PREFIX@bin/@PKGNAME_BASE@@EXEC_POSTFIX@ \
+	@TCROOT@@PREFIX@bin/@PKGNAME_BASE@@EXEC_POSTFIX@ \
+	@TCROOT@@PREFIX@bin/@PKGNAME_BASE@-dbg@EXEC_POSTFIX@
+
+@TCROOT@@PREFIX@share/pixmaps/@PKGNAME_BASE@.png: \
+		share/icons/handedness.png
+	@test -d $(dir $@) || mkdir -p $(dir $@)
+	cp $< $@
+
+@TCROOT@@PREFIX@bin/@PKGNAME_BASE@-dbg@EXEC_POSTFIX@: \
+		tmp/@TCROOT@@PREFIX@bin/@PKGNAME_BASE@@EXEC_POSTFIX@
+	@test -d $(dir $@) || mkdir -p $(dir $@)
+	cp $< $@
+
+@TCROOT@@APPS_DIR@/@PKGNAME_BASE@.desktop: \
+		@PRJNAME@.desktop
+	@test -d $(dir $@) || mkdir -p $(dir $@)
+	cp $< $@
+

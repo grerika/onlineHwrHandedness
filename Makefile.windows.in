@@ -1,0 +1,21 @@
+#
+#	Author: Peter Csaszar <csjpeter@gmail.com>
+#	Copyright (C) 2015 Peter Csaszar
+#
+
+ICONS_DIR=@TCROOT@@PREFIX@share/@PKGNAME_BASE@/icons
+CSS_DIR=@TCROOT@@PREFIX@share/@PKGNAME_BASE@/css
+TRANSLATIONS_DIR=@TCROOT@@PREFIX@share/@PKGNAME_BASE@/translations
+
+IMAGES+=\
+	@TCROOT@@PREFIX@share/pixmaps/@PKGNAME_BASE@.ico
+
+BUILD_DEPS+=\
+	@TCROOT@@PREFIX@lib/debug/@TCROOT@@PREFIX@bin/@PKGNAME_BASE@@EXEC_POSTFIX@ \
+	@TCROOT@@PREFIX@bin/@PKGNAME_BASE@@EXEC_POSTFIX@
+
+@TCROOT@@PREFIX@share/pixmaps/@PKGNAME_BASE@.ico: \
+		share/icons/handedness.png
+	@test -d $(dir $@) || mkdir -p $(dir $@)
+	icotool -c -o $@ $<
+

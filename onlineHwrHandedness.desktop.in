@@ -1,0 +1,14 @@
+[Desktop Entry]
+Name=Handedness @VERSION_API@
+GenericName=@PRJDESC@
+MimeType=application/@PRJNAME@
+Exec=/@PREFIX@bin/@PKGNAME@
+Type=Application
+Encoding=UTF-8
+Version=@VERSION@
+Categories=Application;Office;Qt
+Icon=@PKGNAME@
+X-Window-Icon=@PKGNAME@
+X-Window-Icon-Dimmed=@PKGNAME@
+X-Osso-Service=@PKGNAME@
+X-Osso-Type=application/x-executable

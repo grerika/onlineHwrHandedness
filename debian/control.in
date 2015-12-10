@@ -1,0 +1,25 @@
+Source: @PKGNAME@
+Section: devel
+Priority: optional
+Maintainer: @AUTHOR@ <@EMAIL@>
+Standards-Version: 3.9.3
+Build-Depends: make (>=3.0.0), dpkg (>=1.15.0), gawk | mawk, tar (>=1.0.0), gzip (>=1.0.0),
+ debhelper (>= 9), pkg-config (>= 0.25), libc6 (>=2.0.0),
+ qtbase5-dev (>= 5.2.1), qtbase5-dev-tools (>= 5.2.1),
+ libqt5gui5 (>= 5.2.1),
+ icoutils (>= 0.29.0), dos2unix (>= 5.0.0), nsis (>= 2.46)
+
+Package: @PKGNAME@
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: @PRJDESC@
+@PRJDESCRIPTION@
+
+Package: @PKGNAME@-dbg
+Section: debug
+Priority: extra
+Architecture: any
+Depends: @PKGNAME@ (= ${binary:Version}), ${misc:Depends}
+Description: Debug files for @PKGNAME@
+@PRJDESCRIPTION@
