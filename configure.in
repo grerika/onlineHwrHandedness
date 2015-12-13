@@ -195,16 +195,19 @@ test "x${TARGET_ARCH}" = "x${HOST_ARCH}" && {
 #CFLAGS="${CFLAGS} $(${PKGCONFIG} --cflags Qt5Sql)" || exit $?
 CFLAGS="${CFLAGS} $(${PKGCONFIG} --cflags Qt5Gui)" || exit $?
 CFLAGS="${CFLAGS} $(${PKGCONFIG} --cflags Qt5Widgets)" || exit $?
+CFLAGS="${CFLAGS} $(${PKGCONFIG} --cflags Qt5Xml)" || exit $?
 echo "${CONFIG}" | grep staticbuild > /dev/null && {
 #	STATICS+="${STATICS} $(${PKGCONFIG} --static --libs QtCore)" || exit $?
 #	STATICS+="${STATICS} $(${PKGCONFIG} --static --libs Qt5Sql)" || exit $?
 	STATICS+="${STATICS} $(${PKGCONFIG} --static --libs Qt5Gui)" || exit $?
 	STATICS+="${STATICS} $(${PKGCONFIG} --static --libs Qt5Widgets)" || exit $?
+	STATICS+="${STATICS} $(${PKGCONFIG} --static --libs Qt5Xml)" || exit $?
 } || {
 #	LIBS+="${LIBS} $(${PKGCONFIG} --libs QtCore)" || exit $?
 #	LIBS+="${LIBS} $(${PKGCONFIG} --libs Qt5Sql)" || exit $?
 	LIBS+="${LIBS} $(${PKGCONFIG} --libs Qt5Gui)" || exit $?
 	LIBS+="${LIBS} $(${PKGCONFIG} --libs Qt5Widgets)" || exit $?
+	LIBS+="${LIBS} $(${PKGCONFIG} --libs Qt5Xml)" || exit $?
 }
 
 LDFLAGS="${LDFLAGS} -Wl,--as-needed -rdynamic"

@@ -9,7 +9,11 @@
 #include <config.h>
 #include <h_macros.h>
 #include <h_config.h>
+#include "h_plot.h"
 #include <QWidget>
+#include <QPushButton>
+#include <QLineEdit>
+#include <QDomDocument>
 
 class MainView : public QWidget
 {
@@ -22,15 +26,27 @@ public:
 	virtual ~MainView();
 
 private:
+	virtual void showEvent(QShowEvent *event);
 	virtual void closeEvent(QCloseEvent *event);
-
-	void retranslate();
-	void applyLayout();
-
 	virtual void changeEvent(QEvent * event);
 
-private slots:
+	void retranslate();
 
+private slots:
+	void loadDataSlot();
+	void saveDataSlot();
+
+private:
+	QString loadedFileName;
+	QString savedFileName;
+	QDomDocument doc;
+	//Script script;
+
+	Plot plot;
+	QPushButton loadDataBtn;
+	QLineEdit loadedFileNameEdit;
+	QPushButton saveDataBtn;
+	QLineEdit savedFileNameEdit;
 };
 
 #endif

@@ -5,8 +5,8 @@ Maintainer: @AUTHOR@ <@EMAIL@>
 Standards-Version: 3.9.3
 Build-Depends: make (>=3.0.0), dpkg (>=1.15.0), gawk | mawk, tar (>=1.0.0), gzip (>=1.0.0),
  debhelper (>= 9), pkg-config (>= 0.25), libc6 (>=2.0.0),
- qtbase5-dev (>= 5.2.1), qtbase5-dev-tools (>= 5.2.1),
- libqt5gui5 (>= 5.2.1),
+ qtbase5-dev (>= 5.4.0), qtbase5-dev-tools (>= 5.4.0),
+ libqt5gui5 (>= 5.4.0), libqt5xml5 (>=5.4.0),
  icoutils (>= 0.29.0), dos2unix (>= 5.0.0), nsis (>= 2.46)
 
 Package: @PKGNAME@

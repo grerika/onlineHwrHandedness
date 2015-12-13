@@ -130,6 +130,9 @@ source: \
 	$(DIST_DIR)/src/h_config.h \
 	$(DIST_DIR)/src/h_config.cpp \
 	\
+	$(DIST_DIR)/src/qt/h_plot.h \
+	$(DIST_DIR)/src/qt/h_plot.cpp \
+	\
 	$(DIST_DIR)/src/qt/h_mainview.h \
 	$(DIST_DIR)/src/qt/h_mainview.cpp \
 	\

@@ -41,8 +41,8 @@ int main(int argc, char *args[])
 	}
 
 	try {
-		LOG("Environment variables:\n",
-			QProcessEnvironment::systemEnvironment().toStringList().join("\n"));
+		/*LOG("Environment variables:\n",
+			QProcessEnvironment::systemEnvironment().toStringList().join("\n"));*/
 
 		Path::initRootPath(args[0]);
 

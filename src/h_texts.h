@@ -62,7 +62,7 @@ public:
 				append(*fmt);
 				fmt++;
 			}
-			cat(args...);
+			//cat(args...);
 		}
 
 private:
@@ -79,7 +79,7 @@ inline bool operator<(const QString & a, const Text & b) { return b.isMore(a); }
 inline bool operator<(const Text & a, const Text & b) { return a.isLess(b); }
 
 inline Text & operator<<(Text & lhs, const bool & rhs) { lhs.append(rhs); return lhs; }
-inline Text & operator<<(Text & lhs, const int & rhs) { lhs.append(rhs); return lhs; }
+inline Text & operator<<(Text & lhs, const int & rhs) { lhs+=QString("%1").arg(rhs); return lhs; }
 inline Text & operator<<(Text & lhs, const unsigned & rhs) {lhs.append(rhs); return lhs;}
 inline Text & operator<<(Text & lhs, const double & rhs) { lhs+=QString("%1").arg(rhs); return lhs; }
 inline Text & operator<<(Text & lhs, const QDateTime & rhs){lhs+=rhs.toString(); return lhs;}

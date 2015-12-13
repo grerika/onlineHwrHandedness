@@ -123,6 +123,9 @@ HANDEDNESS_OBJECTS+= \
 	\
 	tmp/src/h_config.opp \
 	\
+	tmp/src/qt/h_plot.opp \
+	tmp/src/qt/moc/h_plot.opp \
+	\
 	tmp/src/qt/h_mainview.opp \
 	tmp/src/qt/moc/h_mainview.opp \
 	\
