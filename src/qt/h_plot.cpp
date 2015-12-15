@@ -10,14 +10,13 @@
 
 #include "h_plot.h"
 
-Plot::Plot(const QDomDocument & doc, QWidget *parent) : QWidget(parent),
+Plot::Plot(QWidget *parent) : QWidget(parent),
+	selectedObject(0),
 	cursorX(0),
 	cursorY(0),
-	doc(doc),
 	rgbPlot(0),
 	idPlot(0),
 	size(0),
-	selectedObject(0),
 	selectionDistance(10),
 	image(0)
 {
@@ -55,6 +54,8 @@ void Plot::resizeEvent(QResizeEvent * event)
 	image = new QImage((const uchar *)(rgbPlot),
 			width(), height(),
 			QImage::Format_ARGB32, plotImageCleanupHandler, rgbPlot);
+
+	surfaceCreated();
 }
 
 QSize Plot::sizeHint() const
@@ -71,12 +72,6 @@ void Plot::paintEvent(QPaintEvent * event)
 {
 	(void)event;
 
-	QColor black(0, 0, 0);
-	QColor white(255, 255, 255);
-	QColor red(255, 0, 0);
-	QColor green(0, 255, 0);
-	QColor blue(0, 0, 255);
-
 /*	QColor c = black;
 
 	if(selectedObject == 1) c = red; else c = black;
@@ -92,51 +87,6 @@ void Plot::paintEvent(QPaintEvent * event)
 	lineTo(4, c, 0, 10);
 	lineTo(4, c, 0, 0);
 */
-	clear();
-
-	int objectId = 0;
-	// no lets read strokes from dom
-	QDomElement docElem = doc.documentElement();
-	QDomNodeList strokeNodes = docElem.elementsByTagName("Stroke");
-	for(int i=0; i<strokeNodes.length(); i++){
-		QDomNode strokeNode = strokeNodes.item(i);
-		QDomElement strokeElem = strokeNode.toElement();
-		if(strokeElem.isNull())
-			continue;
-
-		objectId = i+1;
-		QColor color = black;
-		if(selectedObject == objectId)
-			color = red;
-
-		bool started = false;
-		QDomNodeList pointNodes = strokeElem.elementsByTagName("Point");
-		for(int j=0; j<pointNodes.length(); j++){
-			QDomNode pointNode = pointNodes.item(j);
-			QDomElement pointElem = pointNode.toElement();
-			if(pointElem.isNull())
-				continue;
-
-			QDomAttr attrX = pointElem.attributeNode("x");
-			if(attrX.isNull())
-				continue;
-			QDomAttr attrY = pointElem.attributeNode("y");
-			if(attrY.isNull())
-				continue;
-
-			int x = attrX.value().toInt()/5;
-			int y = attrY.value().toInt()/5;
-			//LOG("id: %, x: %, y: %", objectId, x, y);
-			if(x == 0 && y == 0)
-				continue;
-			if(!started){
-				setCursor(x, y);
-				started = true;
-				continue;
-			}
-			lineTo(objectId, color, x, y);
-		}
-	}
 
 	QPainter widgetPainter(this);
 	widgetPainter.drawImage(0, 0, *image);
@@ -165,7 +115,7 @@ void Plot::mousePressEvent(QMouseEvent * event)
 	}
 	if(selectedObject){
 		LOG("Found line selectedObject: %", selectedObject);
-		update();
+		surfaceCreated();
 	}
 }
 

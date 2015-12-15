@@ -23,7 +23,6 @@ SCC TidMainWindowOpenDialogPattarn = QT_TRANSLATE_NOOP("MainView", "XML Files (*
 SCC TidMainWindowSaveButton = QT_TRANSLATE_NOOP("MainView", "Save file");
 
 MainView::MainView(QWidget *parent) :
-	plot(doc),
 	loadDataBtn(TidMainWindowLoadButton, this),
 	saveDataBtn(TidMainWindowSaveButton, this)
 {
@@ -38,6 +37,7 @@ MainView::MainView(QWidget *parent) :
 	connect(qApp, SIGNAL(aboutToQuit()), this, SLOT(close()));
 	connect(&loadDataBtn, SIGNAL(clicked()), this, SLOT(loadDataSlot()));
 	connect(&saveDataBtn, SIGNAL(clicked()), this, SLOT(saveDataSlot()));
+	connect(&plot, SIGNAL(surfaceCreated()), this, SLOT(redraw()));
 
 
 	QHBoxLayout * openLayout = new QHBoxLayout;
@@ -89,6 +89,107 @@ void MainView::loadDataSlot()
 
 	loadedFileName = fileName;
 	loadedFileNameEdit.setText(loadedFileName);
+
+	redraw();
+}
+
+void MainView::redraw()
+{
+	QColor black(0, 0, 0);
+	QColor white(255, 255, 255);
+	QColor red(255, 0, 0);
+	QColor green(0, 255, 0);
+	QColor blue(0, 0, 255);
+
+	double scale = 1.0;
+	double maxX = 0;
+	double maxY = 0;
+	double minX = INT_MAX;
+	double minY = INT_MAX;
+
+	plot.clear();
+
+	int objectId = 0;
+	// now lets read strokes from dom
+	QDomElement docElem = doc.documentElement();
+	QDomNodeList strokeNodes = docElem.elementsByTagName("Stroke");
+
+	// find width and height of the area to be plotted
+	for(int i=0; i<strokeNodes.length(); i++){
+		QDomNode strokeNode = strokeNodes.item(i);
+		QDomElement strokeElem = strokeNode.toElement();
+		if(strokeElem.isNull())
+			continue;
+
+		QDomNodeList pointNodes = strokeElem.elementsByTagName("Point");
+		for(int j=0; j<pointNodes.length(); j++){
+			QDomNode pointNode = pointNodes.item(j);
+			QDomElement pointElem = pointNode.toElement();
+			if(pointElem.isNull())
+				continue;
+
+			QDomAttr attrX = pointElem.attributeNode("x");
+			if(attrX.isNull())
+				continue;
+			QDomAttr attrY = pointElem.attributeNode("y");
+			if(attrY.isNull())
+				continue;
+
+			int x = attrX.value().toInt() * scale;
+			int y = attrY.value().toInt() * scale;
+
+			if(x < minX) minX = x;
+			if(y < minY) minY = y;
+			if(maxX < x) maxX = x;
+			if(maxY < y) maxY = y;
+		}
+	}
+
+	double width = maxX - minX;
+	double height = maxY - minY;
+	double scaleWidth = plot.width() / width;
+	double scaleHeight = plot.height() / height;
+	scale = scaleWidth < scaleHeight ? scaleWidth : scaleHeight;
+
+	for(int i=0; i<strokeNodes.length(); i++){
+		QDomNode strokeNode = strokeNodes.item(i);
+		QDomElement strokeElem = strokeNode.toElement();
+		if(strokeElem.isNull())
+			continue;
+
+		objectId = i+1;
+		QColor color = black;
+		if(plot.selectedObject == objectId)
+			color = red;
+
+		bool started = false;
+		QDomNodeList pointNodes = strokeElem.elementsByTagName("Point");
+		for(int j=0; j<pointNodes.length(); j++){
+			QDomNode pointNode = pointNodes.item(j);
+			QDomElement pointElem = pointNode.toElement();
+			if(pointElem.isNull())
+				continue;
+
+			QDomAttr attrX = pointElem.attributeNode("x");
+			if(attrX.isNull())
+				continue;
+			QDomAttr attrY = pointElem.attributeNode("y");
+			if(attrY.isNull())
+				continue;
+
+			int x = (attrX.value().toInt() - minX) * scale;
+			int y = (attrY.value().toInt() - minY) * scale;
+			//LOG("id: %, x: %, y: %", objectId, x, y);
+			//if(x == 0 && y == 0)
+			//	continue;
+			if(!started){
+				plot.setCursor(x, y);
+				started = true;
+				continue;
+			}
+			plot.lineTo(objectId, color, x, y);
+		}
+	}
 
 	plot.update();
 }

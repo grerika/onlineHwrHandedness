@@ -31,7 +31,7 @@ private:
 	MY_Q_OBJECT
 
 public:
-	Plot(const QDomDocument & doc, QWidget *parent = 0);
+	Plot(QWidget *parent = 0);
 	virtual ~Plot();
 
 	QSize minimumSizeHint() const Q_DECL_OVERRIDE;
@@ -42,21 +42,24 @@ public:
 	void lineTo(int id, QColor col, int x2, int y2);
 	void clear();
 
+signals:
+	void surfaceCreated();
+
 protected:
 	virtual void changeEvent(QEvent * event);
 	virtual void resizeEvent(QResizeEvent * event);
 	virtual void mousePressEvent(QMouseEvent * event);
 	virtual void paintEvent(QPaintEvent *event) Q_DECL_OVERRIDE;
 
+public:
+	int selectedObject;
 private:
 	int cursorX;
 	int cursorY;
-	const QDomDocument & doc;
 	//const Script & script;
 	QRgb * rgbPlot;
 	int * idPlot;
 	int size;
-	int selectedObject;
 	int selectionDistance;
 	QImage * image;
 };

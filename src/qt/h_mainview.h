@@ -35,6 +35,7 @@ private:
 private slots:
 	void loadDataSlot();
 	void saveDataSlot();
+	void redraw();
 
 private:
 	QString loadedFileName;
