@@ -19,7 +19,8 @@
 SCC TidMainWindowTitle = QT_TRANSLATE_NOOP("MainView", "%1 - main view");
 SCC TidMainWindowLoadButton = QT_TRANSLATE_NOOP("MainView", "Load file");
 SCC TidMainWindowOpenDialog = QT_TRANSLATE_NOOP("MainView", "Open xml file");
-SCC TidMainWindowOpenDialogPattarn = QT_TRANSLATE_NOOP("MainView", "XML Files (*.xml)");
+SCC TidMainWindowSaveDialog = QT_TRANSLATE_NOOP("MainView", "Save xml file");
+SCC TidMainWindowFileDialogFilter = QT_TRANSLATE_NOOP("MainView", "XML Files (*.xml)");
 SCC TidMainWindowSaveButton = QT_TRANSLATE_NOOP("MainView", "Save file");
 
 MainView::MainView(QWidget *parent) :
@@ -46,7 +47,7 @@ MainView::MainView(QWidget *parent) :
 
 	QHBoxLayout * saveLayout = new QHBoxLayout;
 	saveLayout->addWidget(&saveDataBtn);
-	saveLayout->addWidget(&savedFileNameEdit);
+	saveLayout->addWidget(&saveFileNameEdit);
 
 	QHBoxLayout * plotLayout = new QHBoxLayout;
 	plotLayout->addWidget(&plot);
@@ -66,21 +67,27 @@ MainView::~MainView()
 
 void MainView::loadDataSlot()
 {
-	loadedFileName = "";
-	loadedFileNameEdit.setText(loadedFileName);
+	if(loadedFileName == ""){
+		loadedFileName = QDir::currentPath();
+		loadedFileNameEdit.setText(loadedFileName);
+	}
 
 	QString fileName = QFileDialog::getOpenFileName(this,
 			tr(TidMainWindowOpenDialog),
-			QDir::currentPath(),
-			tr(TidMainWindowOpenDialogPattarn)
+			loadedFileName,//QDir::currentPath(),
+			tr(TidMainWindowFileDialogFilter)
 			);
+	if(fileName == "")
+		return;
 
 	QFile file(fileName);
 	if(!file.open(QIODevice::ReadOnly)){
 		QMessageBox::information(this, tr("Information"), tr("Failed to load file."));
 		return;
 	}
-	if(!doc.setContent(&file)){
+	auto data = file.readAll();
+	data.replace("\r", "");
+	if(!doc.setContent(data)){
 		file.close();
 		QMessageBox::information(this, tr("Information"), tr("Failed to parse xml file."));
 		return;
@@ -91,6 +98,39 @@ void MainView::loadDataSlot()
 	loadedFileNameEdit.setText(loadedFileName);
 
 	redraw();
+}
+
+void MainView::saveDataSlot()
+{
+	if(saveFileName == "") {
+		saveFileName = loadedFileName;
+		saveFileName.replace("/Data/", "/ChangedData/");
+		saveFileName.replace("\\Data\\", "\\ChangedData\\");
+	}
+
+	QString fileName = QFileDialog::getSaveFileName(this,
+			tr(TidMainWindowSaveDialog),
+			saveFileName,//QDir::currentPath(),
+			tr(TidMainWindowFileDialogFilter)
+			);
+	if(fileName == "")
+		return;
+	LOG("filename: %", fileName);
+	saveFileName = fileName;
+	saveFileNameEdit.setText(fileName);
+
+	QFile file(fileName);
+	if(!file.open(QIODevice::WriteOnly)){
+		QMessageBox::information(this, tr("Information"), tr("Failed to save file."));
+		return;
+	}
+	auto data = doc.toByteArray(2);
+	if(file.write(data) == -1){
+		file.close();
+		QMessageBox::information(this, tr("Information"), tr("Failed to write xml file."));
+		return;
+	}
+	file.close();
 }
 
 void MainView::redraw()
@@ -192,10 +232,6 @@ void MainView::redraw()
 	}
 
 	plot.update();
-}
-
-void MainView::saveDataSlot()
-{
 }
 
 void MainView::showEvent(QShowEvent *event)

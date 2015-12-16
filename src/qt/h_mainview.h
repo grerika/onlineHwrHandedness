@@ -39,7 +39,7 @@ private slots:
 
 private:
 	QString loadedFileName;
-	QString savedFileName;
+	QString saveFileName;
 	QDomDocument doc;
 	//Script script;
 
@@ -47,7 +47,7 @@ private:
 	QPushButton loadDataBtn;
 	QLineEdit loadedFileNameEdit;
 	QPushButton saveDataBtn;
-	QLineEdit savedFileNameEdit;
+	QLineEdit saveFileNameEdit;
 };
 
 #endif
