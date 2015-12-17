@@ -107,13 +107,15 @@ void Plot::mousePressEvent(QMouseEvent * event)
 	int x = event->x();
 	int y = event->y();
 
+	int prevSelectedObject = selectedObject;
+	selectedObject = 0;
 	for(int d = 0; d <= selectionDistance; d++){
 		selectedObject = idPlot[qAbs(y - d) * width + x]; if(selectedObject) break; // up
 		selectedObject = idPlot[y * width + qAbs(x - d)]; if(selectedObject) break; // left
 		selectedObject = idPlot[(y + d) * width + x]; if(selectedObject) break; // down
 		selectedObject = idPlot[y * width + x + d]; if(selectedObject) break; // right
 	}
-	if(selectedObject){
+	if(prevSelectedObject != selectedObject){
 		LOG("Found line selectedObject: %", selectedObject);
 		surfaceCreated();
 	}

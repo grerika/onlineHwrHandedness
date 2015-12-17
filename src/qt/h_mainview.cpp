@@ -7,6 +7,7 @@
 
 #include <config.h>
 #include <h_macros.h>
+#include <QApplication>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QFileDialog>
@@ -22,10 +23,19 @@ SCC TidMainWindowOpenDialog = QT_TRANSLATE_NOOP("MainView", "Open xml file");
 SCC TidMainWindowSaveDialog = QT_TRANSLATE_NOOP("MainView", "Save xml file");
 SCC TidMainWindowFileDialogFilter = QT_TRANSLATE_NOOP("MainView", "XML Files (*.xml)");
 SCC TidMainWindowSaveButton = QT_TRANSLATE_NOOP("MainView", "Save file");
+SCC TidMainWindowLeftToRight = QT_TRANSLATE_NOOP("MainView", "Left to right");
+SCC TidMainWindowRightToLeft = QT_TRANSLATE_NOOP("MainView", "Right to left");
+SCC TidMainWindowClearOrientation = QT_TRANSLATE_NOOP("MainView", "Clear orientation");
 
 MainView::MainView(QWidget *parent) :
 	loadDataBtn(TidMainWindowLoadButton, this),
-	saveDataBtn(TidMainWindowSaveButton, this)
+	saveDataBtn(TidMainWindowSaveButton, this),
+	leftToRightBtn(this),
+	rightToLeftBtn(this),
+	leftToRightSct(QKeySequence(Qt::Key_J), this),
+	rightToLeftSct(QKeySequence(Qt::Key_B), this),
+	clearOrientationBtn(this),
+	clearOrientationSct(QKeySequence(Qt::Key_C), this)
 {
 	(void)parent;
 	setWindowIcon(QIcon(Path::icon("handedness.png")));
@@ -33,12 +43,23 @@ MainView::MainView(QWidget *parent) :
 
 	loadDataBtn.setAutoDefault(false);
 	saveDataBtn.setAutoDefault(false);
-
+	leftToRightBtn.setText(TidMainWindowLeftToRight);
+	rightToLeftBtn.setText(TidMainWindowRightToLeft);
+	clearOrientationBtn.setText(TidMainWindowClearOrientation);
 
 	connect(qApp, SIGNAL(aboutToQuit()), this, SLOT(close()));
 	connect(&loadDataBtn, SIGNAL(clicked()), this, SLOT(loadDataSlot()));
 	connect(&saveDataBtn, SIGNAL(clicked()), this, SLOT(saveDataSlot()));
 	connect(&plot, SIGNAL(surfaceCreated()), this, SLOT(redraw()));
+
+	connect(&leftToRightBtn, SIGNAL(clicked()), this, SLOT(leftToRightSlot()));
+	connect(&leftToRightSct, SIGNAL(activated()), this, SLOT(leftToRightSlot()));
+
+	connect(&rightToLeftBtn, SIGNAL(clicked()), this, SLOT(rightToLeftSlot()));
+	connect(&rightToLeftSct, SIGNAL(activated()), this, SLOT(rightToLeftSlot()));
+
+	connect(&clearOrientationBtn, SIGNAL(clicked()), this, SLOT(clearOrientationSlot()));
+	connect(&clearOrientationSct, SIGNAL(activated()), this, SLOT(clearOrientationSlot()));
 
 
 	QHBoxLayout * openLayout = new QHBoxLayout;
@@ -49,6 +70,11 @@ MainView::MainView(QWidget *parent) :
 	saveLayout->addWidget(&saveDataBtn);
 	saveLayout->addWidget(&saveFileNameEdit);
 
+	QHBoxLayout * toolLayout = new QHBoxLayout;
+	toolLayout->addWidget(&leftToRightBtn);
+	toolLayout->addWidget(&clearOrientationBtn);
+	toolLayout->addWidget(&rightToLeftBtn);
+
 	QHBoxLayout * plotLayout = new QHBoxLayout;
 	plotLayout->addWidget(&plot);
 	//layout->addStretch(0);
@@ -56,9 +82,11 @@ MainView::MainView(QWidget *parent) :
 	QVBoxLayout * mainLayout = new QVBoxLayout;
 	mainLayout->addLayout(openLayout);
 	mainLayout->addLayout(saveLayout);
+	mainLayout->addLayout(toolLayout);
 	mainLayout->addLayout(plotLayout);
 
 	setLayout(mainLayout);
+	//QApplication::aboutQt();
 }
 
 MainView::~MainView()
@@ -96,6 +124,8 @@ void MainView::loadDataSlot()
 
 	loadedFileName = fileName;
 	loadedFileNameEdit.setText(loadedFileName);
+
+	plot.selectedObject = 0;
 
 	redraw();
 }
@@ -199,8 +229,10 @@ void MainView::redraw()
 
 		objectId = i+1;
 		QColor color = black;
-		if(plot.selectedObject == objectId)
-			color = red;
+		if(strokeElem.attribute("orientation") == "leftToRight")
+			color = green;
+		if(strokeElem.attribute("orientation") == "rightToLeft")
+			color = blue;
 
 		bool started = false;
 		QDomNodeList pointNodes = strokeElem.elementsByTagName("Point");
@@ -229,9 +261,93 @@ void MainView::redraw()
 			}
 			plot.lineTo(objectId, color, x, y);
 		}
+
+		if(plot.selectedObject == objectId){
+			color = red;
+			bool started = false;
+			QDomNodeList pointNodes = strokeElem.elementsByTagName("Point");
+			for(int j=0; j<pointNodes.length(); j++){
+				QDomNode pointNode = pointNodes.item(j);
+				QDomElement pointElem = pointNode.toElement();
+				if(pointElem.isNull())
+					continue;
+
+				QDomAttr attrX = pointElem.attributeNode("x");
+				if(attrX.isNull())
+					continue;
+				QDomAttr attrY = pointElem.attributeNode("y");
+				if(attrY.isNull())
+					continue;
+
+				int x = (attrX.value().toInt() - minX) * scale;
+				int y = (attrY.value().toInt() - minY) * scale;
+				y += 1;
+				x -= 1;
+				//LOG("id: %, x: %, y: %", objectId, x, y);
+				//if(x == 0 && y == 0)
+				//	continue;
+				if(!started){
+					plot.setCursor(x, y);
+					started = true;
+					continue;
+				}
+				plot.lineTo(objectId, color, x, y);
+			}
+		}
 	}
 
 	plot.update();
+}
+
+void MainView::leftToRightSlot()
+{
+	QDomElement docElem = doc.documentElement();
+	QDomNodeList strokeNodes = docElem.elementsByTagName("Stroke");
+
+	for(int i=0; i<strokeNodes.length(); i++){
+		QDomNode strokeNode = strokeNodes.item(i);
+		QDomElement strokeElem = strokeNode.toElement();
+		if(strokeElem.isNull())
+			continue;
+
+		if(plot.selectedObject == i + 1)
+			strokeElem.setAttribute("orientation", "leftToRight");
+	}
+	redraw();
+}
+
+void MainView::rightToLeftSlot()
+{
+	QDomElement docElem = doc.documentElement();
+	QDomNodeList strokeNodes = docElem.elementsByTagName("Stroke");
+
+	for(int i=0; i<strokeNodes.length(); i++){
+		QDomNode strokeNode = strokeNodes.item(i);
+		QDomElement strokeElem = strokeNode.toElement();
+		if(strokeElem.isNull())
+			continue;
+
+		if(plot.selectedObject == i + 1)
+			strokeElem.setAttribute("orientation", "rightToLeft");
+	}
+	redraw();
+}
+
+void MainView::clearOrientationSlot()
+{
+	QDomElement docElem = doc.documentElement();
+	QDomNodeList strokeNodes = docElem.elementsByTagName("Stroke");
+
+	for(int i=0; i<strokeNodes.length(); i++){
+		QDomNode strokeNode = strokeNodes.item(i);
+		QDomElement strokeElem = strokeNode.toElement();
+		if(strokeElem.isNull())
+			continue;
+
+		if(plot.selectedObject == i + 1)
+			strokeElem.setAttribute("orientation", "");
+	}
+	redraw();
 }
 
 void MainView::showEvent(QShowEvent *event)

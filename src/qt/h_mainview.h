@@ -12,8 +12,10 @@
 #include "h_plot.h"
 #include <QWidget>
 #include <QPushButton>
+#include <QToolButton>
 #include <QLineEdit>
 #include <QDomDocument>
+#include <QShortcut>
 
 class MainView : public QWidget
 {
@@ -36,6 +38,9 @@ private slots:
 	void loadDataSlot();
 	void saveDataSlot();
 	void redraw();
+	void leftToRightSlot();
+	void rightToLeftSlot();
+	void clearOrientationSlot();
 
 private:
 	QString loadedFileName;
@@ -48,6 +53,12 @@ private:
 	QLineEdit loadedFileNameEdit;
 	QPushButton saveDataBtn;
 	QLineEdit saveFileNameEdit;
+	QToolButton leftToRightBtn;
+	QToolButton rightToLeftBtn;
+	QShortcut leftToRightSct;
+	QShortcut rightToLeftSct;
+	QToolButton clearOrientationBtn;
+	QShortcut clearOrientationSct;
 };
 
 #endif
