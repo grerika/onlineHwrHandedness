@@ -13,17 +13,6 @@
 #include <QPen>
 #include <QDomDocument>
 
-/*
-class StrokePoint
-{
-	int x;
-	int y;
-	double time;
-};
-typedef QList<StrokePoint> Stroke;
-typedef QList<Stroke> Script;
-*/
-
 class Plot : public QWidget
 {
 private:

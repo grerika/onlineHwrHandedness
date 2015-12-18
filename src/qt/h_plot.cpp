@@ -72,22 +72,6 @@ void Plot::paintEvent(QPaintEvent * event)
 {
 	(void)event;
 
-/*	QColor c = black;
-
-	if(selectedObject == 1) c = red; else c = black;
-	line(1, c, 0,0,50,500);
-	if(selectedObject == 2) c = red; else c = black;
-	line(2, c, 0,0,500,50);
-	if(selectedObject == 3) c = red; else c = black;
-	line(3, c, 0,0,500,500);
-
-	setCursor(0, 0);
-	lineTo(4, c, 10, 0);
-	lineTo(4, c, 10, 10);
-	lineTo(4, c, 0, 10);
-	lineTo(4, c, 0, 0);
-*/
-
 	QPainter widgetPainter(this);
 	widgetPainter.drawImage(0, 0, *image);
 }
@@ -177,26 +161,6 @@ void Plot::line(int id, QColor col, int x1, int y1, int x2, int y2)
 		rgbPlot[idx] = col.rgb();
 		idPlot [idx] = id;
 	}
-	/*	
-	QColor white(255, 255, 255);
-	if(width <= x1) return;
-	if(height <= y1) return;
-	if(x1 < 0) return;
-	if(y1 < 0) return;
-	int idx = width * y1 + x1;
-	//LOG("Drawing on x, idx is ", idx);
-	rgbPlot[idx] = white.rgb();
-	idPlot [idx] = id;
-		
-	if(width <= x2) return;
-	if(height <= y2) return;
-	if(x2 < 0) return;
-	if(y2 < 0) return;
-	idx = width * y2 + x2;
-	//LOG("Drawing on x, idx is ", idx);
-	rgbPlot[idx] = white.rgb();
-	idPlot [idx] = id;
-	*/
 }
 
 void Plot::lineTo(int id, QColor col, int x2, int y2)

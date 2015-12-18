@@ -26,6 +26,7 @@ SCC TidMainWindowSaveButton = QT_TRANSLATE_NOOP("MainView", "Save file");
 SCC TidMainWindowLeftToRight = QT_TRANSLATE_NOOP("MainView", "Left to right");
 SCC TidMainWindowRightToLeft = QT_TRANSLATE_NOOP("MainView", "Right to left");
 SCC TidMainWindowClearOrientation = QT_TRANSLATE_NOOP("MainView", "Clear orientation");
+SCC TidMainWindowCalcHandedness = QT_TRANSLATE_NOOP("MainView", "Calculate handedness");
 
 MainView::MainView(QWidget *parent) :
 	loadDataBtn(TidMainWindowLoadButton, this),
@@ -35,7 +36,8 @@ MainView::MainView(QWidget *parent) :
 	leftToRightSct(QKeySequence(Qt::Key_J), this),
 	rightToLeftSct(QKeySequence(Qt::Key_B), this),
 	clearOrientationBtn(this),
-	clearOrientationSct(QKeySequence(Qt::Key_C), this)
+	clearOrientationSct(QKeySequence(Qt::Key_C), this),
+	calcHandednessBtn(this)
 {
 	(void)parent;
 	setWindowIcon(QIcon(Path::icon("handedness.png")));
@@ -47,6 +49,8 @@ MainView::MainView(QWidget *parent) :
 	rightToLeftBtn.setText(TidMainWindowRightToLeft);
 	clearOrientationBtn.setText(TidMainWindowClearOrientation);
 
+	calcHandednessBtn.setText(TidMainWindowCalcHandedness);
+
 	connect(qApp, SIGNAL(aboutToQuit()), this, SLOT(close()));
 	connect(&loadDataBtn, SIGNAL(clicked()), this, SLOT(loadDataSlot()));
 	connect(&saveDataBtn, SIGNAL(clicked()), this, SLOT(saveDataSlot()));
@@ -54,13 +58,12 @@ MainView::MainView(QWidget *parent) :
 
 	connect(&leftToRightBtn, SIGNAL(clicked()), this, SLOT(leftToRightSlot()));
 	connect(&leftToRightSct, SIGNAL(activated()), this, SLOT(leftToRightSlot()));
-
 	connect(&rightToLeftBtn, SIGNAL(clicked()), this, SLOT(rightToLeftSlot()));
 	connect(&rightToLeftSct, SIGNAL(activated()), this, SLOT(rightToLeftSlot()));
-
 	connect(&clearOrientationBtn, SIGNAL(clicked()), this, SLOT(clearOrientationSlot()));
 	connect(&clearOrientationSct, SIGNAL(activated()), this, SLOT(clearOrientationSlot()));
 
+	connect(&calcHandednessBtn, SIGNAL(clicked()), this, SLOT(calcHandednessSlot()));
 
 	QHBoxLayout * openLayout = new QHBoxLayout;
 	openLayout->addWidget(&loadDataBtn);
@@ -75,9 +78,16 @@ MainView::MainView(QWidget *parent) :
 	toolLayout->addWidget(&clearOrientationBtn);
 	toolLayout->addWidget(&rightToLeftBtn);
 
+	QVBoxLayout * statLayout = new QVBoxLayout;
+	statLayout->addWidget(&leftToRightSum);
+	statLayout->addWidget(&rightToLeftSum);
+	statLayout->addStretch(1);
+	statLayout->addWidget(&calcHandednessBtn);
+	statLayout->addStretch(1);
+
 	QHBoxLayout * plotLayout = new QHBoxLayout;
 	plotLayout->addWidget(&plot);
-	//layout->addStretch(0);
+	plotLayout->addLayout(statLayout);
 
 	QVBoxLayout * mainLayout = new QVBoxLayout;
 	mainLayout->addLayout(openLayout);
@@ -87,6 +97,7 @@ MainView::MainView(QWidget *parent) :
 
 	setLayout(mainLayout);
 	//QApplication::aboutQt();
+	updateStat();
 }
 
 MainView::~MainView()
@@ -115,7 +126,7 @@ void MainView::loadDataSlot()
 	}
 	auto data = file.readAll();
 	data.replace("\r", "");
-	if(!doc.setContent(data)){
+	if(!script.loadXmlData(data)){
 		file.close();
 		QMessageBox::information(this, tr("Information"), tr("Failed to parse xml file."));
 		return;
@@ -126,6 +137,7 @@ void MainView::loadDataSlot()
 	loadedFileNameEdit.setText(loadedFileName);
 
 	plot.selectedObject = 0;
+	updateStat();
 
 	redraw();
 }
@@ -154,7 +166,7 @@ void MainView::saveDataSlot()
 		QMessageBox::information(this, tr("Information"), tr("Failed to save file."));
 		return;
 	}
-	auto data = doc.toByteArray(2);
+	auto data = script.getXmlData();
 	if(file.write(data) == -1){
 		file.close();
 		QMessageBox::information(this, tr("Information"), tr("Failed to write xml file."));
@@ -171,118 +183,46 @@ void MainView::redraw()
 	QColor green(0, 255, 0);
 	QColor blue(0, 0, 255);
 
-	double scale = 1.0;
 	double maxX = 0;
 	double maxY = 0;
 	double minX = INT_MAX;
 	double minY = INT_MAX;
 
 	plot.clear();
+	bool started;
 
 	int objectId = 0;
-	// now lets read strokes from dom
-	QDomElement docElem = doc.documentElement();
-	QDomNodeList strokeNodes = docElem.elementsByTagName("Stroke");
-
 	// find width and height of the area to be plotted
-	for(int i=0; i<strokeNodes.length(); i++){
-		QDomNode strokeNode = strokeNodes.item(i);
-		QDomElement strokeElem = strokeNode.toElement();
-		if(strokeElem.isNull())
-			continue;
+	for(int i=0; i<script.size(); i++){
+		Stroke & s = script[i];
+		for(int j=0; j<s.size(); j++){
+			StrokePoint & p = s[j];
 
-		QDomNodeList pointNodes = strokeElem.elementsByTagName("Point");
-		for(int j=0; j<pointNodes.length(); j++){
-			QDomNode pointNode = pointNodes.item(j);
-			QDomElement pointElem = pointNode.toElement();
-			if(pointElem.isNull())
-				continue;
-
-			QDomAttr attrX = pointElem.attributeNode("x");
-			if(attrX.isNull())
-				continue;
-			QDomAttr attrY = pointElem.attributeNode("y");
-			if(attrY.isNull())
-				continue;
-
-			int x = attrX.value().toInt() * scale;
-			int y = attrY.value().toInt() * scale;
-
-			if(x < minX) minX = x;
-			if(y < minY) minY = y;
-			if(maxX < x) maxX = x;
-			if(maxY < y) maxY = y;
+			if(p.x < minX) minX = p.x;
+			if(p.y < minY) minY = p.y;
+			if(maxX < p.x) maxX = p.x;
+			if(maxY < p.y) maxY = p.y;
 		}
 	}
-
 	double width = maxX - minX;
 	double height = maxY - minY;
 	double scaleWidth = plot.width() / width;
 	double scaleHeight = plot.height() / height;
-	scale = scaleWidth < scaleHeight ? scaleWidth : scaleHeight;
+	double scale = scaleWidth < scaleHeight ? scaleWidth : scaleHeight;
 
-	for(int i=0; i<strokeNodes.length(); i++){
-		QDomNode strokeNode = strokeNodes.item(i);
-		QDomElement strokeElem = strokeNode.toElement();
-		if(strokeElem.isNull())
-			continue;
-
+	for(int i=0; i<script.size(); i++){
+		Stroke & s = script[i];
 		objectId = i+1;
-		QColor color = black;
-		if(strokeElem.attribute("orientation") == "leftToRight")
-			color = green;
-		if(strokeElem.attribute("orientation") == "rightToLeft")
-			color = blue;
-
-		bool started = false;
-		QDomNodeList pointNodes = strokeElem.elementsByTagName("Point");
-		for(int j=0; j<pointNodes.length(); j++){
-			QDomNode pointNode = pointNodes.item(j);
-			QDomElement pointElem = pointNode.toElement();
-			if(pointElem.isNull())
-				continue;
-
-			QDomAttr attrX = pointElem.attributeNode("x");
-			if(attrX.isNull())
-				continue;
-			QDomAttr attrY = pointElem.attributeNode("y");
-			if(attrY.isNull())
-				continue;
-
-			int x = (attrX.value().toInt() - minX) * scale;
-			int y = (attrY.value().toInt() - minY) * scale;
-			//LOG("id: %, x: %, y: %", objectId, x, y);
-			//if(x == 0 && y == 0)
-			//	continue;
-			if(!started){
-				plot.setCursor(x, y);
-				started = true;
-				continue;
-			}
-			plot.lineTo(objectId, color, x, y);
-		}
+		QColor color;
 
 		if(plot.selectedObject == objectId){
+			started = false;
 			color = red;
-			bool started = false;
-			QDomNodeList pointNodes = strokeElem.elementsByTagName("Point");
-			for(int j=0; j<pointNodes.length(); j++){
-				QDomNode pointNode = pointNodes.item(j);
-				QDomElement pointElem = pointNode.toElement();
-				if(pointElem.isNull())
-					continue;
+			for(int j=0; j<s.size(); j++){
+				StrokePoint & p = s[j];
 
-				QDomAttr attrX = pointElem.attributeNode("x");
-				if(attrX.isNull())
-					continue;
-				QDomAttr attrY = pointElem.attributeNode("y");
-				if(attrY.isNull())
-					continue;
-
-				int x = (attrX.value().toInt() - minX) * scale;
-				int y = (attrY.value().toInt() - minY) * scale;
-				y += 1;
-				x -= 1;
+				int x = (p.x - minX) * scale - 1;
+				int y = (p.y - minY) * scale + 1;
 				//LOG("id: %, x: %, y: %", objectId, x, y);
 				//if(x == 0 && y == 0)
 				//	continue;
@@ -294,59 +234,76 @@ void MainView::redraw()
 				plot.lineTo(objectId, color, x, y);
 			}
 		}
+
+		color = black;
+		if(s.orientation == Stroke::Orientation::LeftToRight)
+			color = green;
+		if(s.orientation == Stroke::Orientation::RightToLeft)
+			color = blue;
+
+		started = false;
+		for(int j=0; j<s.size(); j++){
+			StrokePoint & p = s[j];
+
+			int x = (p.x - minX) * scale;
+			int y = (p.y - minY) * scale;
+			//LOG("id: %, x: %, y: %", objectId, x, y);
+			//if(x == 0 && y == 0)
+			//	continue;
+			if(!started){
+				plot.setCursor(x, y);
+				started = true;
+				continue;
+			}
+			plot.lineTo(objectId, color, x, y);
+		}
 	}
 
 	plot.update();
 }
 
+void MainView::updateStat()
+{
+	leftToRightSum.setText(QString("Left to right strokes: ")+
+				QString::number(script.leftToRightNum));
+	rightToLeftSum.setText(QString("Right to left strokes: ")+
+				QString::number(script.rightToLeftNum));
+}
+
 void MainView::leftToRightSlot()
 {
-	QDomElement docElem = doc.documentElement();
-	QDomNodeList strokeNodes = docElem.elementsByTagName("Stroke");
-
-	for(int i=0; i<strokeNodes.length(); i++){
-		QDomNode strokeNode = strokeNodes.item(i);
-		QDomElement strokeElem = strokeNode.toElement();
-		if(strokeElem.isNull())
-			continue;
-
-		if(plot.selectedObject == i + 1)
-			strokeElem.setAttribute("orientation", "leftToRight");
-	}
+	if(!plot.selectedObject)
+		return;
+	script[plot.selectedObject-1].orientation = Stroke::Orientation::LeftToRight;
+	script.calculateHandednessStat();
+	updateStat();
 	redraw();
 }
 
 void MainView::rightToLeftSlot()
 {
-	QDomElement docElem = doc.documentElement();
-	QDomNodeList strokeNodes = docElem.elementsByTagName("Stroke");
-
-	for(int i=0; i<strokeNodes.length(); i++){
-		QDomNode strokeNode = strokeNodes.item(i);
-		QDomElement strokeElem = strokeNode.toElement();
-		if(strokeElem.isNull())
-			continue;
-
-		if(plot.selectedObject == i + 1)
-			strokeElem.setAttribute("orientation", "rightToLeft");
-	}
+	if(!plot.selectedObject)
+		return;
+	script[plot.selectedObject-1].orientation = Stroke::Orientation::RightToLeft;
+	script.calculateHandednessStat();
+	updateStat();
 	redraw();
 }
 
 void MainView::clearOrientationSlot()
 {
-	QDomElement docElem = doc.documentElement();
-	QDomNodeList strokeNodes = docElem.elementsByTagName("Stroke");
+	if(!plot.selectedObject)
+		return;
+	script[plot.selectedObject-1].orientation = Stroke::Orientation::None;
+	script.calculateHandednessStat();
+	updateStat();
+	redraw();
+}
 
-	for(int i=0; i<strokeNodes.length(); i++){
-		QDomNode strokeNode = strokeNodes.item(i);
-		QDomElement strokeElem = strokeNode.toElement();
-		if(strokeElem.isNull())
-			continue;
-
-		if(plot.selectedObject == i + 1)
-			strokeElem.setAttribute("orientation", "");
-	}
+void MainView::calcHandednessSlot()
+{
+	script.calculateHandedness();
+	updateStat();
 	redraw();
 }
 

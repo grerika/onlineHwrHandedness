@@ -10,12 +10,13 @@
 #include <h_macros.h>
 #include <h_config.h>
 #include "h_plot.h"
+#include "h_data.h"
 #include <QWidget>
 #include <QPushButton>
 #include <QToolButton>
 #include <QLineEdit>
-#include <QDomDocument>
 #include <QShortcut>
+#include <QLabel>
 
 class MainView : public QWidget
 {
@@ -38,27 +39,35 @@ private slots:
 	void loadDataSlot();
 	void saveDataSlot();
 	void redraw();
+	void updateStat();
 	void leftToRightSlot();
 	void rightToLeftSlot();
 	void clearOrientationSlot();
 
+	void calcHandednessSlot();
+
 private:
 	QString loadedFileName;
 	QString saveFileName;
-	QDomDocument doc;
-	//Script script;
+	Script script;
 
 	Plot plot;
 	QPushButton loadDataBtn;
 	QLineEdit loadedFileNameEdit;
 	QPushButton saveDataBtn;
 	QLineEdit saveFileNameEdit;
+
 	QToolButton leftToRightBtn;
 	QToolButton rightToLeftBtn;
 	QShortcut leftToRightSct;
 	QShortcut rightToLeftSct;
 	QToolButton clearOrientationBtn;
 	QShortcut clearOrientationSct;
+
+	QToolButton calcHandednessBtn;
+
+	QLabel leftToRightSum;
+	QLabel rightToLeftSum;
 };
 
 #endif
