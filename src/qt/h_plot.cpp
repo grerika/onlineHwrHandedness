@@ -60,7 +60,7 @@ void Plot::resizeEvent(QResizeEvent * event)
 
 QSize Plot::sizeHint() const
 {
-	return QSize(600, 600);
+	return QSize(2000, 2000);
 }
 
 QSize Plot::minimumSizeHint() const
@@ -101,7 +101,7 @@ void Plot::mousePressEvent(QMouseEvent * event)
 	}
 	if(prevSelectedObject != selectedObject){
 		LOG("Found line selectedObject: %", selectedObject);
-		surfaceCreated();
+		objectSelected();
 	}
 }
 
@@ -111,7 +111,53 @@ void Plot::setCursor(int x, int y)
 	cursorY = y;
 }
 
-void Plot::line(int id, QColor col, int x1, int y1, int x2, int y2)
+void Plot::point(int id, QColor col, int x, int y)
+{
+	if(!rgbPlot || !idPlot)
+		return;
+	//LOG("line drawing: Width: %, Height: %, Size: %", width(), height(), size);
+	int width = this->width();
+	int height = this->height();
+	if(size != width * height){
+		LOG("Widht and or height changed since plot area allocated.");
+		return;
+	}
+
+	if(width <= x) return;
+	if(height <= y) return;
+	if(x < 0) return;
+	if(y < 0) return;
+	int idx = width * y + x;
+	//LOG("Drawing on x, idx is ", idx);
+	rgbPlot[idx] = col.rgb();
+	idPlot [idx] = id;
+}
+
+void Plot::bigPoint(int id, QColor col, int x, int y, double radius)
+{
+	if(!rgbPlot || !idPlot)
+		return;
+	//LOG("line drawing: Width: %, Height: %, Size: %", width(), height(), size);
+	int width = this->width();
+	int height = this->height();
+	if(size != width * height){
+		LOG("Widht and or height changed since plot area allocated.");
+		return;
+	}
+
+	int x1 = x - radius;
+	int y1 = y - radius;
+	int x2 = x + radius;
+	int y2 = y + radius;
+	for(int i = x1; i <= x2; i++)
+		for(int j = y1; j <= y2; j++){
+			double d = DISTANCE(x, y, i, j);
+			if(d <= radius)
+				point(id, col, i, j);
+		}
+}
+
+void Plot::line(int id, QColor col, int x1, int y1, int x2, int y2, int lineWidth)
 {
 	if(!rgbPlot || !idPlot)
 		return;
@@ -125,6 +171,7 @@ void Plot::line(int id, QColor col, int x1, int y1, int x2, int y2)
 
 	//int length = qSqrt(qPow(x2 - x1, 2) + qPow(y2 - y1, 2));
 	double m = double(x2 - x1) / double(y2 - y1);
+	double r = double(lineWidth) / 2.0;
 
 	int xD = x2 - x1;
 	int xL = qAbs(xD);
@@ -134,14 +181,7 @@ void Plot::line(int id, QColor col, int x1, int y1, int x2, int y2)
 	for(int x = 0; x < xL; x++){
 		int xx = x1 + s * x;
 		int yy = s*x/m + y1;
-		if(width <= xx) break;
-		if(height <= yy) break;
-		if(xx < 0) break;
-		if(yy < 0) break;
-		int idx = width * yy + xx;
-		//LOG("Drawing on x, idx is ", idx);
-		rgbPlot[idx] = col.rgb();
-		idPlot [idx] = id;
+		bigPoint(id, col, xx, yy, r);
 	}
 
 	int yD = y2 - y1;
@@ -152,20 +192,13 @@ void Plot::line(int id, QColor col, int x1, int y1, int x2, int y2)
 	for(int y = 0; y < yL; y++){
 		int xx = s*y*m + x1;
 		int yy = y1 + s * y;
-		if(width <= xx) break;
-		if(height <= yy) break;
-		if(xx < 0) break;
-		if(yy < 0) break;
-		int idx = width * yy + xx;
-		//LOG("Drawing on y, idx is ", idx);
-		rgbPlot[idx] = col.rgb();
-		idPlot [idx] = id;
+		bigPoint(id, col, xx, yy, r);
 	}
 }
 
-void Plot::lineTo(int id, QColor col, int x2, int y2)
+void Plot::lineTo(int id, QColor col, int x2, int y2, int lineWidth)
 {
-	line(id, col, cursorX, cursorY, x2, y2);
+	line(id, col, cursorX, cursorY, x2, y2, lineWidth);
 	setCursor(x2, y2);
 }
 

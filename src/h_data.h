@@ -3,14 +3,24 @@
  * Copyright (C) 2015 Csaszar, Peter
  */
 
+#include <QtCore/qmath.h>
 #include <QByteArray>
 #include <QString>
 #include <QList>
 #include <QDomDocument>
 
+#include <h_macros.h>
+
 class StrokePoint
 {
 public:
+	StrokePoint():x(0),y(0),time(0){}
+	double distance(const StrokePoint & p){ return DISTANCE(x, y, p.x, p.y); }
+	operator bool(){return x != 0 || y != 0; }
+	StrokePoint & operator=(const int & i) { x = i; y = i; return *this; }
+	bool operator==(const int & i) { return x == i && y == i; }
+	bool operator!=(const StrokePoint & p) { return x != p.x || y != p.y; }
+	bool operator==(const StrokePoint & p) { return x == p.x && y == p.y; }
 	int x;
 	int y;
 	double time;

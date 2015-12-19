@@ -40,6 +40,7 @@ private slots:
 	void saveDataSlot();
 	void redraw();
 	void updateStat();
+	void updateCursor();
 	void leftToRightSlot();
 	void rightToLeftSlot();
 	void clearOrientationSlot();
@@ -68,6 +69,8 @@ private:
 
 	QLabel leftToRightSum;
 	QLabel rightToLeftSum;
+	QLabel objectIdLabel;
+	QLabel orientationLabel;
 };
 
 #endif

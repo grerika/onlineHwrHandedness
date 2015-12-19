@@ -12,6 +12,8 @@
 #include <QHBoxLayout>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QStyle>
+#include <QDesktopWidget>
 
 #include "h_mainview.h"
 
@@ -27,6 +29,8 @@ SCC TidMainWindowLeftToRight = QT_TRANSLATE_NOOP("MainView", "Left to right");
 SCC TidMainWindowRightToLeft = QT_TRANSLATE_NOOP("MainView", "Right to left");
 SCC TidMainWindowClearOrientation = QT_TRANSLATE_NOOP("MainView", "Clear orientation");
 SCC TidMainWindowCalcHandedness = QT_TRANSLATE_NOOP("MainView", "Calculate handedness");
+SCC TidMainWindowObjectId = QT_TRANSLATE_NOOP("MainView", "Stroke id: ");
+SCC TidMainWindowOrientation = QT_TRANSLATE_NOOP("MainView", "Orientation: ");
 
 MainView::MainView(QWidget *parent) :
 	loadDataBtn(TidMainWindowLoadButton, this),
@@ -48,6 +52,8 @@ MainView::MainView(QWidget *parent) :
 	leftToRightBtn.setText(TidMainWindowLeftToRight);
 	rightToLeftBtn.setText(TidMainWindowRightToLeft);
 	clearOrientationBtn.setText(TidMainWindowClearOrientation);
+	objectIdLabel.setText(TidMainWindowObjectId);
+	orientationLabel.setText(TidMainWindowOrientation);
 
 	calcHandednessBtn.setText(TidMainWindowCalcHandedness);
 
@@ -55,6 +61,7 @@ MainView::MainView(QWidget *parent) :
 	connect(&loadDataBtn, SIGNAL(clicked()), this, SLOT(loadDataSlot()));
 	connect(&saveDataBtn, SIGNAL(clicked()), this, SLOT(saveDataSlot()));
 	connect(&plot, SIGNAL(surfaceCreated()), this, SLOT(redraw()));
+	connect(&plot, SIGNAL(objectSelected()), this, SLOT(updateCursor()));
 
 	connect(&leftToRightBtn, SIGNAL(clicked()), this, SLOT(leftToRightSlot()));
 	connect(&leftToRightSct, SIGNAL(activated()), this, SLOT(leftToRightSlot()));
@@ -79,10 +86,13 @@ MainView::MainView(QWidget *parent) :
 	toolLayout->addWidget(&rightToLeftBtn);
 
 	QVBoxLayout * statLayout = new QVBoxLayout;
+	statLayout->addWidget(&calcHandednessBtn);
+	statLayout->addStretch(1);
 	statLayout->addWidget(&leftToRightSum);
 	statLayout->addWidget(&rightToLeftSum);
 	statLayout->addStretch(1);
-	statLayout->addWidget(&calcHandednessBtn);
+	statLayout->addWidget(&objectIdLabel);
+	statLayout->addWidget(&orientationLabel);
 	statLayout->addStretch(1);
 
 	QHBoxLayout * plotLayout = new QHBoxLayout;
@@ -97,6 +107,17 @@ MainView::MainView(QWidget *parent) :
 
 	setLayout(mainLayout);
 	//QApplication::aboutQt();
+
+	// align window to the center of the desktop
+	this->setGeometry(
+			QStyle::alignedRect(
+			Qt::LeftToRight,
+			Qt::AlignCenter,
+			this->size(),
+			qApp->desktop()->availableGeometry()
+			)
+		);
+
 	updateStat();
 }
 
@@ -182,6 +203,9 @@ void MainView::redraw()
 	QColor red(255, 0, 0);
 	QColor green(0, 255, 0);
 	QColor blue(0, 0, 255);
+	QColor brown(135, 90, 45);
+	QColor yellow(255, 255, 85);
+	QColor purple(200, 0, 200);
 
 	double maxX = 0;
 	double maxY = 0;
@@ -214,32 +238,33 @@ void MainView::redraw()
 		Stroke & s = script[i];
 		objectId = i+1;
 		QColor color;
+		int lineWidth = 1;
+
+		color = blue;
+		if(s.orientation == Stroke::Orientation::LeftToRight){
+			color = brown;
+			lineWidth = 2;
+		}
+		if(s.orientation == Stroke::Orientation::RightToLeft){
+			color = yellow;
+			lineWidth = 2;
+		}
 
 		if(plot.selectedObject == objectId){
 			started = false;
-			color = red;
 			for(int j=0; j<s.size(); j++){
 				StrokePoint & p = s[j];
 
-				int x = (p.x - minX) * scale - 1;
-				int y = (p.y - minY) * scale + 1;
-				//LOG("id: %, x: %, y: %", objectId, x, y);
-				//if(x == 0 && y == 0)
-				//	continue;
+				int x = (p.x - minX) * scale;
+				int y = (p.y - minY) * scale;
 				if(!started){
 					plot.setCursor(x, y);
 					started = true;
 					continue;
 				}
-				plot.lineTo(objectId, color, x, y);
+				plot.lineTo(objectId, red, x, y, lineWidth+2);
 			}
 		}
-
-		color = black;
-		if(s.orientation == Stroke::Orientation::LeftToRight)
-			color = green;
-		if(s.orientation == Stroke::Orientation::RightToLeft)
-			color = blue;
 
 		started = false;
 		for(int j=0; j<s.size(); j++){
@@ -247,15 +272,12 @@ void MainView::redraw()
 
 			int x = (p.x - minX) * scale;
 			int y = (p.y - minY) * scale;
-			//LOG("id: %, x: %, y: %", objectId, x, y);
-			//if(x == 0 && y == 0)
-			//	continue;
 			if(!started){
 				plot.setCursor(x, y);
 				started = true;
 				continue;
 			}
-			plot.lineTo(objectId, color, x, y);
+			plot.lineTo(objectId, color, x, y, lineWidth);
 		}
 	}
 
@@ -268,6 +290,17 @@ void MainView::updateStat()
 				QString::number(script.leftToRightNum));
 	rightToLeftSum.setText(QString("Right to left strokes: ")+
 				QString::number(script.rightToLeftNum));
+}
+
+void MainView::updateCursor()
+{
+	objectIdLabel.setText(QString("Stroke id: ")+QString::number(plot.selectedObject));
+	if(plot.selectedObject && plot.selectedObject-1 < script.size())
+		orientationLabel.setText(QString("Orientation: ")+
+				QString::number(script[plot.selectedObject-1].orientation));
+	else
+		orientationLabel.setText(QString("Orientation: 0"));
+	redraw();
 }
 
 void MainView::leftToRightSlot()

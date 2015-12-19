@@ -69,6 +69,8 @@
 
 #define SCC static const char*
 
+#define DISTANCE(x1, y1, x2, y2) \
+		qSqrt(qPow(qAbs(double(x2)-double(x1)), 2) + qPow(qAbs(double(y2)-double(y1)), 2))
 
 #ifdef DEBUG
 #define DBG(...){ \

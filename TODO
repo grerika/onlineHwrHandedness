@@ -3,3 +3,6 @@
  - Calcuate scale and reposition only when plot area size is changed
  - Load language file according to system LANG environment
  - Hungarian translation
+ - enlarged view of the selected stroke for visual inspection
+ - legend on color codes
+

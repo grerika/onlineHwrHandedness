@@ -27,12 +27,15 @@ public:
 	QSize sizeHint() const Q_DECL_OVERRIDE;
 
 	void setCursor(int x, int y);
-	void line(int id, QColor col, int x1, int y1, int x2, int y2);
-	void lineTo(int id, QColor col, int x2, int y2);
+	void point(int id, QColor col, int x, int y);
+	void bigPoint(int id, QColor col, int x, int y, double radius = 1);
+	void line(int id, QColor col, int x1, int y1, int x2, int y2, int lineWidth = 1);
+	void lineTo(int id, QColor col, int x2, int y2, int lineWidth = 1);
 	void clear();
 
 signals:
 	void surfaceCreated();
+	void objectSelected();
 
 protected:
 	virtual void changeEvent(QEvent * event);
