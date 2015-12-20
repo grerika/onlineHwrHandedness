@@ -49,6 +49,7 @@ function config ()
 		--appsdir=usr/share/applications \
 		--fpic \
 		--gnu-source \
+		--ldflags=-rdynamic \
 		$@ \
 		--relative-path \
 		|| exit $?

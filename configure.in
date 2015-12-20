@@ -210,7 +210,7 @@ echo "${CONFIG}" | grep staticbuild > /dev/null && {
 	LIBS+="${LIBS} $(${PKGCONFIG} --libs Qt5Xml)" || exit $?
 }
 
-LDFLAGS="${LDFLAGS} -Wl,--as-needed -rdynamic"
+LDFLAGS="${LDFLAGS} -Wl,--as-needed"
 
 INCLUDES=-Isrc
 

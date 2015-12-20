@@ -1,5 +1,5 @@
 
- - Set locale to u or en before writing double number to xml
+ - Set locale to US or EN before writing double number to xml
  - Calcuate scale and reposition only when plot area size is changed
  - Load language file according to system LANG environment
  - Hungarian translation

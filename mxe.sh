@@ -24,10 +24,13 @@ function exec_in_dir ()
 	return ${RET}
 }
 
-TCROOT=opt/mxe
+TCROOT=${HOME}/devtools/mxe
+#TCROOT=opt/mxe
 
 export PKG_CONFIG_LIBDIR=${PKG_CONFIG_LIBDIR}:/${TCROOT}/lib
-export PKG_CONFIG_PATH=${PKG_CONFIG_PATH}:/${TCROOT}/lib/pkgconfig
+export PKG_CONFIG_PATH=${PKG_CONFIG_PATH}:/${TCROOT}/usr/i686-w64-mingw32.static/qt5/lib/pkgconfig
+./i686-w64-mingw32.static-crosstools-gen.sh ./${DISTRIB_CODENAME}-x-mxe/crosstools
+export PATH=${PWD}/${DISTRIB_CODENAME}-x-mxe/crosstools:$PATH
 
 ./dist-config.sh \
 	--target=mxe \
@@ -35,7 +38,7 @@ export PKG_CONFIG_PATH=${PKG_CONFIG_PATH}:/${TCROOT}/lib/pkgconfig
 	--packaging=windows \
 	-- \
 	--relative-path \
-	--target=i686-pc-mingw32 \
+	--target=i686-w64-mingw32.static \
 	--prefix=${PKGNAME_BASE} \
 	--gnu-source \
 	--static \
