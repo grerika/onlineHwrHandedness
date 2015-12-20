@@ -1,5 +1,10 @@
 #!/bin/bash
 
+#
+#       Author: Peter Csaszar <csjpeter@gmail.com>
+#       Copyright (C) 2015 Peter Csaszar
+#
+
 if test "x$1" = "x"; then
 	CROSSTOOLS_BIN=~/bin/crosstools
 else

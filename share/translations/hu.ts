@@ -4,9 +4,102 @@
 <context>
     <name>MainView</name>
     <message>
-        <location filename="../../src/qt/h_mainview.cpp" line="15"/>
+        <location filename="../../src/qt/h_mainview.cpp" line="22"/>
         <source>%1 - main view</source>
         <translation>%1 - fő nézet</translation>
+    </message>
+    <message>
+        <location filename="../../src/qt/h_mainview.cpp" line="23"/>
+        <source>Load file</source>
+        <translation>Fájl betöltése</translation>
+    </message>
+    <message>
+        <location filename="../../src/qt/h_mainview.cpp" line="24"/>
+        <source>Open xml file</source>
+        <translation>Xml adatfájl megynitása</translation>
+    </message>
+    <message>
+        <location filename="../../src/qt/h_mainview.cpp" line="25"/>
+        <source>Save xml file</source>
+        <translation>Xml adatfájl mentése</translation>
+    </message>
+    <message>
+        <location filename="../../src/qt/h_mainview.cpp" line="26"/>
+        <source>XML Files (*.xml)</source>
+        <translation>XML Fájlok (*.xml)</translation>
+    </message>
+    <message>
+        <location filename="../../src/qt/h_mainview.cpp" line="27"/>
+        <source>Save file</source>
+        <translation>Fájl mentése</translation>
+    </message>
+    <message>
+        <location filename="../../src/qt/h_mainview.cpp" line="28"/>
+        <source>Left to right</source>
+        <translation>Balról jobbra</translation>
+    </message>
+    <message>
+        <location filename="../../src/qt/h_mainview.cpp" line="29"/>
+        <source>Right to left</source>
+        <translation>Jobbról balra</translation>
+    </message>
+    <message>
+        <location filename="../../src/qt/h_mainview.cpp" line="30"/>
+        <source>Clear orientation</source>
+        <translation>Irányultság törlése</translation>
+    </message>
+    <message>
+        <location filename="../../src/qt/h_mainview.cpp" line="31"/>
+        <source>Calculate handedness</source>
+        <translation>Kezesség számítása</translation>
+    </message>
+    <message>
+        <location filename="../../src/qt/h_mainview.cpp" line="32"/>
+        <source>Left to right: %1</source>
+        <translation>Balról jobbra: %1</translation>
+    </message>
+    <message>
+        <location filename="../../src/qt/h_mainview.cpp" line="33"/>
+        <source>Right to left: %1</source>
+        <translation>Jobbról balra: %1</translation>
+    </message>
+    <message>
+        <location filename="../../src/qt/h_mainview.cpp" line="34"/>
+        <source>Stroke id: %1</source>
+        <translation>Kiválasztott vonal száma: %1</translation>
+    </message>
+    <message>
+        <location filename="../../src/qt/h_mainview.cpp" line="35"/>
+        <source>Orientation: %1</source>
+        <translation>Kiválasztott vonal irányultsága: %1</translation>
+    </message>
+    <message>
+        <location filename="../../src/qt/h_mainview.cpp" line="157"/>
+        <location filename="../../src/qt/h_mainview.cpp" line="164"/>
+        <location filename="../../src/qt/h_mainview.cpp" line="199"/>
+        <location filename="../../src/qt/h_mainview.cpp" line="205"/>
+        <source>Information</source>
+        <translation>Tájékoztatás</translation>
+    </message>
+    <message>
+        <location filename="../../src/qt/h_mainview.cpp" line="157"/>
+        <source>Failed to load file.</source>
+        <translation>Nem sikerült betölteni a fájlt!</translation>
+    </message>
+    <message>
+        <location filename="../../src/qt/h_mainview.cpp" line="164"/>
+        <source>Failed to parse xml file.</source>
+        <translation>Nem sikerült értelmezni az xml fájlt!</translation>
+    </message>
+    <message>
+        <location filename="../../src/qt/h_mainview.cpp" line="199"/>
+        <source>Failed to save file.</source>
+        <translation>Nem sikerült elmenteni a fájlt!</translation>
+    </message>
+    <message>
+        <location filename="../../src/qt/h_mainview.cpp" line="205"/>
+        <source>Failed to write xml file.</source>
+        <translation>Nem sikerült fájlba írni az xml adatot!</translation>
     </message>
 </context>
 </TS>

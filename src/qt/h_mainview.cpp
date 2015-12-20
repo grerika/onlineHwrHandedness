@@ -29,12 +29,14 @@ SCC TidMainWindowLeftToRight = QT_TRANSLATE_NOOP("MainView", "Left to right");
 SCC TidMainWindowRightToLeft = QT_TRANSLATE_NOOP("MainView", "Right to left");
 SCC TidMainWindowClearOrientation = QT_TRANSLATE_NOOP("MainView", "Clear orientation");
 SCC TidMainWindowCalcHandedness = QT_TRANSLATE_NOOP("MainView", "Calculate handedness");
-SCC TidMainWindowObjectId = QT_TRANSLATE_NOOP("MainView", "Stroke id: ");
-SCC TidMainWindowOrientation = QT_TRANSLATE_NOOP("MainView", "Orientation: ");
+SCC TidMainWindowStatLeftToRight = QT_TRANSLATE_NOOP("MainView", "Left to right: %1");
+SCC TidMainWindowStatRightToLeft = QT_TRANSLATE_NOOP("MainView", "Right to left: %1");
+SCC TidMainWindowStatObjectId = QT_TRANSLATE_NOOP("MainView", "Stroke id: %1");
+SCC TidMainWindowStatOrientation = QT_TRANSLATE_NOOP("MainView", "Orientation: %1");
 
 MainView::MainView(QWidget *parent) :
-	loadDataBtn(TidMainWindowLoadButton, this),
-	saveDataBtn(TidMainWindowSaveButton, this),
+	loadDataBtn(tr(TidMainWindowLoadButton), this),
+	saveDataBtn(tr(TidMainWindowSaveButton), this),
 	leftToRightBtn(this),
 	rightToLeftBtn(this),
 	leftToRightSct(QKeySequence(Qt::Key_J), this),
@@ -49,13 +51,16 @@ MainView::MainView(QWidget *parent) :
 
 	loadDataBtn.setAutoDefault(false);
 	saveDataBtn.setAutoDefault(false);
-	leftToRightBtn.setText(TidMainWindowLeftToRight);
-	rightToLeftBtn.setText(TidMainWindowRightToLeft);
-	clearOrientationBtn.setText(TidMainWindowClearOrientation);
-	objectIdLabel.setText(TidMainWindowObjectId);
-	orientationLabel.setText(TidMainWindowOrientation);
+	leftToRightBtn.setText(tr(TidMainWindowLeftToRight));
+	rightToLeftBtn.setText(tr(TidMainWindowRightToLeft));
+	clearOrientationBtn.setText(tr(TidMainWindowClearOrientation));
 
-	calcHandednessBtn.setText(TidMainWindowCalcHandedness);
+	leftToRightSum.setText(tr(TidMainWindowStatLeftToRight).arg(0));
+	rightToLeftSum.setText(tr(TidMainWindowStatRightToLeft).arg(0));
+	objectIdLabel.setText(tr(TidMainWindowStatObjectId).arg(0));
+	orientationLabel.setText(tr(TidMainWindowStatOrientation).arg(0));
+
+	calcHandednessBtn.setText(tr(TidMainWindowCalcHandedness));
 
 	connect(qApp, SIGNAL(aboutToQuit()), this, SLOT(close()));
 	connect(&loadDataBtn, SIGNAL(clicked()), this, SLOT(loadDataSlot()));
@@ -72,6 +77,11 @@ MainView::MainView(QWidget *parent) :
 
 	connect(&calcHandednessBtn, SIGNAL(clicked()), this, SLOT(calcHandednessSlot()));
 
+	//leftToRightSum.setStyleSheet("QLabel { color : rgb(135, 90, 45); }"); // brown
+	leftToRightSum.setStyleSheet("QLabel { color : rgb(120, 80, 40); }"); // brown
+	//rightToLeftSum.setStyleSheet("QLabel { color : rgb(255, 255, 85); }"); // yellow
+	rightToLeftSum.setStyleSheet("QLabel { color : rgb(0, 0, 255); }");
+
 	QHBoxLayout * openLayout = new QHBoxLayout;
 	openLayout->addWidget(&loadDataBtn);
 	openLayout->addWidget(&loadedFileNameEdit);
@@ -81,9 +91,11 @@ MainView::MainView(QWidget *parent) :
 	saveLayout->addWidget(&saveFileNameEdit);
 
 	QHBoxLayout * toolLayout = new QHBoxLayout;
+	toolLayout->addStretch(1);
 	toolLayout->addWidget(&leftToRightBtn);
 	toolLayout->addWidget(&clearOrientationBtn);
 	toolLayout->addWidget(&rightToLeftBtn);
+	toolLayout->addStretch(1);
 
 	QVBoxLayout * statLayout = new QVBoxLayout;
 	statLayout->addWidget(&calcHandednessBtn);
@@ -93,7 +105,7 @@ MainView::MainView(QWidget *parent) :
 	statLayout->addStretch(1);
 	statLayout->addWidget(&objectIdLabel);
 	statLayout->addWidget(&orientationLabel);
-	statLayout->addStretch(1);
+	statLayout->addStretch(5);
 
 	QHBoxLayout * plotLayout = new QHBoxLayout;
 	plotLayout->addWidget(&plot);
@@ -203,7 +215,7 @@ void MainView::redraw()
 	QColor red(255, 0, 0);
 	QColor green(0, 255, 0);
 	QColor blue(0, 0, 255);
-	QColor brown(135, 90, 45);
+	QColor brown(210, 140, 70);
 	QColor yellow(255, 255, 85);
 	QColor purple(200, 0, 200);
 
@@ -240,13 +252,13 @@ void MainView::redraw()
 		QColor color;
 		int lineWidth = 1;
 
-		color = blue;
+		color = black;
 		if(s.orientation == Stroke::Orientation::LeftToRight){
 			color = brown;
 			lineWidth = 2;
 		}
 		if(s.orientation == Stroke::Orientation::RightToLeft){
-			color = yellow;
+			color = blue;
 			lineWidth = 2;
 		}
 
@@ -284,22 +296,40 @@ void MainView::redraw()
 	plot.update();
 }
 
+QString MainView::orientationToText(enum Stroke::Orientation orient)
+{
+	switch(orient){
+		case Stroke::Orientation::LeftToRight :
+			return tr(TidMainWindowLeftToRight);
+			break;
+		case Stroke::Orientation::RightToLeft :
+			return tr(TidMainWindowRightToLeft);
+			break;
+		default:
+			return "";
+			break;
+	}
+}
+
 void MainView::updateStat()
 {
-	leftToRightSum.setText(QString("Left to right strokes: ")+
-				QString::number(script.leftToRightNum));
-	rightToLeftSum.setText(QString("Right to left strokes: ")+
-				QString::number(script.rightToLeftNum));
+	leftToRightSum.setText(tr(TidMainWindowStatLeftToRight).arg(script.leftToRightNum));
+	rightToLeftSum.setText(tr(TidMainWindowStatRightToLeft).arg(script.rightToLeftNum));
+	if(plot.selectedObject && plot.selectedObject-1 < script.size())
+		orientationLabel.setText(tr(TidMainWindowStatOrientation).arg(
+				  orientationToText(script[plot.selectedObject-1].orientation)));
+	else
+		orientationLabel.setText(tr(TidMainWindowStatOrientation).arg(""));
 }
 
 void MainView::updateCursor()
 {
-	objectIdLabel.setText(QString("Stroke id: ")+QString::number(plot.selectedObject));
+	objectIdLabel.setText(tr(TidMainWindowStatObjectId).arg(plot.selectedObject));
 	if(plot.selectedObject && plot.selectedObject-1 < script.size())
-		orientationLabel.setText(QString("Orientation: ")+
-				QString::number(script[plot.selectedObject-1].orientation));
+		orientationLabel.setText(tr(TidMainWindowStatOrientation).arg(
+				  orientationToText(script[plot.selectedObject-1].orientation)));
 	else
-		orientationLabel.setText(QString("Orientation: 0"));
+		orientationLabel.setText(tr(TidMainWindowStatOrientation).arg(""));
 	redraw();
 }
 

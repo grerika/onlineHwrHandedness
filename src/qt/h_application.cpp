@@ -33,9 +33,15 @@ MainView & Application::mainView()
 	return *mainViewPtr;
 }
 
-void Application::loadTranslation(const char * langCode)
+void Application::loadTranslation(QString lang)
 {
-	QString lang(langCode);
+	if(lang == ""){
+		QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+		lang = env.value("LANG", "en").left(2);
+		if(lang != "hu")
+			lang = "en";
+	}
+
 	if(!lang.length())
 		lang = "en" ; //locale.name();
 	lang.truncate(2);

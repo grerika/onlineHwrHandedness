@@ -22,7 +22,7 @@ public:
 	Application(int & argc, char *argv[]);
 	virtual ~Application();
 
-	void loadTranslation(const char * langCode = NULL);
+	void loadTranslation(QString lang = QString());
 
 	MainView & mainView();
 

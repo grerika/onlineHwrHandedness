@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PRJNAME=onlineHwrHandedness
+PRJNAME=onlinehwrhandedness
 
 VERSION_MAJOR=0
 VERSION_MINOR=1
@@ -17,7 +17,7 @@ PRJDESCRIPTION=" Handwrite analytics\
 
 DEVELOPMENT_START_YEAR=2015
 
-AUTHOR="Császár Péter && Griechisch Erika"
+AUTHOR="Császár Péter and Griechisch Erika"
 EMAIL=onlinehandwritinghandedness@gmail.com
 ORGANIZATION="Peter Csaszar"
 ORGANIZATION_DOMAIN_NAME="csjpeter.eu"

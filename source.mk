@@ -58,7 +58,7 @@ debian: \
 		$(DIST_DIR)/debian/source/format \
 		$(DIST_DIR)/debian/$(PKGNAME).install.in \
 		$(DIST_DIR)/debian/$(PKGNAME)-dbg.install.in \
-		$(DIST_DIR)/onlineHwrHandedness.desktop.in
+		$(DIST_DIR)/onlinehwrhandedness.desktop.in
 	@true
 
 $(DIST_DIR)/nsis/$(PKGNAME).nsi.in: nsis/install.nsi.in

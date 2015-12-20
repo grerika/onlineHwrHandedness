@@ -47,6 +47,8 @@ private slots:
 
 	void calcHandednessSlot();
 
+	QString orientationToText(enum Stroke::Orientation orient);
+
 private:
 	QString loadedFileName;
 	QString saveFileName;

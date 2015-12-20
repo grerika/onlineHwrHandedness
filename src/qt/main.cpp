@@ -41,15 +41,14 @@ int main(int argc, char *args[])
 	}
 
 	try {
-		/*LOG("Environment variables:\n",
-			QProcessEnvironment::systemEnvironment().toStringList().join("\n"));*/
+		//QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+		//LOG("Environment variables:\n%", env.toStringList().join("\n"));
 
 		Path::initRootPath(args[0]);
 
 		app.setWindowIcon(QIcon(Path::icon("handedness.png")));
 
 		app.loadTranslation();
-		app.loadTranslation("hu");
 
 		/* Show main view and run the app */
 		app.mainView().show();
