@@ -44,7 +44,7 @@ public:
 class Script : public QList<Stroke>
 {
 public:
-	Script() : leftToRightNum(0), rightToLeftNum(0), uncertainty(20.0) {}
+	Script() : leftToRightNum(0), rightToLeftNum(0), uncertainty(30.0) {}
 
 	bool loadXmlData(QByteArray & data);
 	QByteArray getXmlData();
