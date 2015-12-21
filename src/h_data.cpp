@@ -138,9 +138,24 @@ void Script::calculateHandednessStat()
 	}
 }
 
+void Script::clearAllOrientation()
+{
+	for(int i=0; i<size(); i++){
+		Stroke & s = (*this)[i];
+		s.orientation = Stroke::Orientation::None;
+	}
+}
+
+/* Looking for the distance of the third point and the line defined by first and last points. */
+int Script::waveHeight(StrokePoint first, StrokePoint last, StrokePoint third)
+{
+	//https://en.wikipedia.org/wiki/Distance_from_a_point_to_a_line
+	return qAbs((last.y-first.y)*third.x-(last.x-first.x)*third.y+last.x*first.y-last.y*first.x) /
+		DISTANCE(first.x, first.y, last.x, last.y);
+}
+
 void Script::calculateHandedness()
 {
-	double limit = 40.0; // kézmozgás bizonytalanságának maximuma; pontoknál, hullámosságnál, stb
 	for(int i=0; i<size(); i++){
 		Stroke & s = (*this)[i];
 		if(s.orientation != Stroke::Orientation::None)
@@ -151,72 +166,17 @@ void Script::calculateHandedness()
 		StrokePoint & first = s[0];
 		StrokePoint & last = s[s.size()-1];
 
-
-		int signX = 0;
-		StrokePoint upperArcX = s[0];
-		StrokePoint lowerArcX = s[0];
-		int signY = 0;
-		StrokePoint upperArcY = s[0];
-		StrokePoint lowerArcY = s[0];
+		int maxDistance = 0;
 		for(int j=1; j<s.size(); j++){
 			StrokePoint & p = s[j];
-
-			int dX = p.x - s[j-1].x;
-			if(dX){
-				int newSign = dX/qAbs(dX);
-				if(signX < 0 && 0 < newSign){
-					if((qAbs(lowerArcX.x-upperArcX.x) < qAbs(p.x-upperArcX.x))
-							  || lowerArcX == s[0])
-						lowerArcX = s[j-1];
-				}
-				if(newSign < 0 && 0 < signX){
-					if((qAbs(lowerArcX.x-upperArcX.x) < qAbs(p.x-lowerArcX.x))
-							  || upperArcX == s[0])
-						upperArcX = s[j-1];
-				}
-				signX = newSign;
-			}
-			int dY = p.y - s[j-1].y;
-			if(dY){
-				int newSign = dY/qAbs(dY);
-				if(signY < 0 && 0 < newSign){
-					if(qAbs(lowerArcY.y-upperArcY.y) < qAbs(p.y-upperArcY.y)
-							|| lowerArcY == s[0])
-						lowerArcY = s[j-1];
-				}
-				if(newSign < 0 && 0 < signY){
-					if(qAbs(lowerArcY.y-upperArcY.y) < qAbs(p.y-lowerArcY.y)
-							|| upperArcY == s[0])
-						upperArcY = s[j-1];
-				}
-				signY = newSign;
-			}
-		}
-		// filter wave form on Y
-		if(lowerArcY != s[0] && upperArcY != s[0] &&
-				limit < qAbs( qAbs(lowerArcY.y-upperArcY.y)/* -qAbs(first.y-last.y)*/))
-			continue;
-		// filter wave form on X
-		if(lowerArcX != s[0] && upperArcX != s[0] &&
-				limit < qAbs( qAbs(lowerArcX.x-upperArcX.x)/* -qAbs(first.x-last.x)*/))
-			continue;
-		// filter 'U' form on Y
-		if(qAbs(upperArcY.y - last.y) < qAbs(upperArcY.y - first.y)){
-			if(qAbs(first.y-last.y) < qAbs(upperArcY.y - last.y))
-				continue;
-		} else {
-			if(qAbs(first.y-last.y) < qAbs(upperArcY.y - first.y))
-				continue;
-		}
-		// filter 'U' form on X
-		if(qAbs(upperArcX.x - last.x) < qAbs(upperArcX.x - first.x)){
-			if(qAbs(first.x-last.x) < qAbs(upperArcX.x - last.x))
-				continue;
-		} else {
-			if(qAbs(first.x-last.x) < qAbs(upperArcX.x - first.x))
-				continue;
+			int d = waveHeight(first, last, p);
+			if(maxDistance < d)
+				maxDistance = d;
 		}
 
+		// filter big wave heights (strokes probably not meant to be linear)
+		if(uncertainty < maxDistance)
+			continue;
 
 		// filter with too much slant
 		double degree = 0;
@@ -227,7 +187,7 @@ void Script::calculateHandedness()
 
 		// filter too short strokes (probably meant to be points)
 		double d = DISTANCE(first.x, first.y, last.x, last.y);
-		if(d < limit)
+		if(d < uncertainty)
 			continue;
 
 

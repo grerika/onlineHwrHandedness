@@ -28,20 +28,19 @@ SCC TidMainWindowSaveButton = QT_TRANSLATE_NOOP("MainView", "Save file");
 SCC TidMainWindowLeftToRight = QT_TRANSLATE_NOOP("MainView", "Left to right");
 SCC TidMainWindowRightToLeft = QT_TRANSLATE_NOOP("MainView", "Right to left");
 SCC TidMainWindowClearOrientation = QT_TRANSLATE_NOOP("MainView", "Clear orientation");
+SCC TidMainWindowClearAllOrientation = QT_TRANSLATE_NOOP("MainView", "Clear all orientation");
 SCC TidMainWindowCalcHandedness = QT_TRANSLATE_NOOP("MainView", "Calculate handedness");
 SCC TidMainWindowStatLeftToRight = QT_TRANSLATE_NOOP("MainView", "Left to right: %1");
 SCC TidMainWindowStatRightToLeft = QT_TRANSLATE_NOOP("MainView", "Right to left: %1");
 SCC TidMainWindowStatObjectId = QT_TRANSLATE_NOOP("MainView", "Stroke id: %1");
 SCC TidMainWindowStatOrientation = QT_TRANSLATE_NOOP("MainView", "Orientation: %1");
+SCC TidMainWindowUncertainty = QT_TRANSLATE_NOOP("MainView", "Uncertainty of handmove:");
 
 MainView::MainView(QWidget *parent) :
 	loadDataBtn(tr(TidMainWindowLoadButton), this),
 	saveDataBtn(tr(TidMainWindowSaveButton), this),
-	leftToRightBtn(this),
-	rightToLeftBtn(this),
 	leftToRightSct(QKeySequence(Qt::Key_J), this),
 	rightToLeftSct(QKeySequence(Qt::Key_B), this),
-	clearOrientationBtn(this),
 	clearOrientationSct(QKeySequence(Qt::Key_C), this),
 	calcHandednessBtn(this)
 {
@@ -54,6 +53,7 @@ MainView::MainView(QWidget *parent) :
 	leftToRightBtn.setText(tr(TidMainWindowLeftToRight));
 	rightToLeftBtn.setText(tr(TidMainWindowRightToLeft));
 	clearOrientationBtn.setText(tr(TidMainWindowClearOrientation));
+	clearAllOrientationBtn.setText(tr(TidMainWindowClearAllOrientation));
 
 	leftToRightSum.setText(tr(TidMainWindowStatLeftToRight).arg(0));
 	rightToLeftSum.setText(tr(TidMainWindowStatRightToLeft).arg(0));
@@ -61,6 +61,10 @@ MainView::MainView(QWidget *parent) :
 	orientationLabel.setText(tr(TidMainWindowStatOrientation).arg(0));
 
 	calcHandednessBtn.setText(tr(TidMainWindowCalcHandedness));
+	uncertaintyLabel.setText(tr(TidMainWindowUncertainty).arg(0));
+	// FIXME who deletes the validator?
+	uncertaintyEdit.setValidator(new QDoubleValidator(0, 100, 2, this));
+	uncertaintyEdit.setText(QString::number(script.uncertainty));
 
 	connect(qApp, SIGNAL(aboutToQuit()), this, SLOT(close()));
 	connect(&loadDataBtn, SIGNAL(clicked()), this, SLOT(loadDataSlot()));
@@ -73,6 +77,7 @@ MainView::MainView(QWidget *parent) :
 	connect(&rightToLeftBtn, SIGNAL(clicked()), this, SLOT(rightToLeftSlot()));
 	connect(&rightToLeftSct, SIGNAL(activated()), this, SLOT(rightToLeftSlot()));
 	connect(&clearOrientationBtn, SIGNAL(clicked()), this, SLOT(clearOrientationSlot()));
+	connect(&clearAllOrientationBtn, SIGNAL(clicked()), this, SLOT(clearAllOrientationSlot()));
 	connect(&clearOrientationSct, SIGNAL(activated()), this, SLOT(clearOrientationSlot()));
 
 	connect(&calcHandednessBtn, SIGNAL(clicked()), this, SLOT(calcHandednessSlot()));
@@ -99,6 +104,9 @@ MainView::MainView(QWidget *parent) :
 
 	QVBoxLayout * statLayout = new QVBoxLayout;
 	statLayout->addWidget(&calcHandednessBtn);
+	statLayout->addWidget(&uncertaintyLabel);
+	statLayout->addWidget(&uncertaintyEdit);
+	statLayout->addWidget(&clearAllOrientationBtn);
 	statLayout->addStretch(1);
 	statLayout->addWidget(&leftToRightSum);
 	statLayout->addWidget(&rightToLeftSum);
@@ -368,8 +376,19 @@ void MainView::clearOrientationSlot()
 	redraw();
 }
 
+void MainView::clearAllOrientationSlot()
+{
+	script.clearAllOrientation();
+	script.calculateHandednessStat();
+	updateStat();
+	redraw();
+}
+
 void MainView::calcHandednessSlot()
 {
+	double uncertainty = uncertaintyEdit.text().toDouble();
+	if(0 <= uncertainty)
+		script.uncertainty = uncertainty;
 	script.calculateHandedness();
 	updateStat();
 	redraw();

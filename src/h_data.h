@@ -44,16 +44,19 @@ public:
 class Script : public QList<Stroke>
 {
 public:
-	Script() : leftToRightNum(0), rightToLeftNum(0) {}
+	Script() : leftToRightNum(0), rightToLeftNum(0), uncertainty(20.0) {}
 
 	bool loadXmlData(QByteArray & data);
 	QByteArray getXmlData();
 	void calculateHandednessStat();
 	void calculateHandedness();
+	void clearAllOrientation();
 
 	int leftToRightNum;
 	int rightToLeftNum;
+	double uncertainty; // maximum allowed wave like move of the hand during drawing straight line
 private:
+	int waveHeight(StrokePoint first, StrokePoint last, StrokePoint third);
 	QDomDocument doc;
 };
 

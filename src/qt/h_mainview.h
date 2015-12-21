@@ -44,6 +44,7 @@ private slots:
 	void leftToRightSlot();
 	void rightToLeftSlot();
 	void clearOrientationSlot();
+	void clearAllOrientationSlot();
 
 	void calcHandednessSlot();
 
@@ -73,6 +74,10 @@ private:
 	QLabel rightToLeftSum;
 	QLabel objectIdLabel;
 	QLabel orientationLabel;
+
+	QToolButton clearAllOrientationBtn;
+	QLabel uncertaintyLabel;
+	QLineEdit uncertaintyEdit;
 };
 
 #endif
