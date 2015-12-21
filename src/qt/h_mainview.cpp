@@ -212,6 +212,7 @@ void MainView::redraw()
 {
 	QColor black(0, 0, 0);
 	QColor white(255, 255, 255);
+	QColor gray(127, 127, 127);
 	QColor red(255, 0, 0);
 	QColor green(0, 255, 0);
 	QColor blue(0, 0, 255);
@@ -284,12 +285,16 @@ void MainView::redraw()
 
 			int x = (p.x - minX) * scale;
 			int y = (p.y - minY) * scale;
+	
 			if(!started){
+				plot.bigPoint(objectId, black, x, y, 4); // mark the start
 				plot.setCursor(x, y);
 				started = true;
 				continue;
 			}
 			plot.lineTo(objectId, color, x, y, lineWidth);
+			if ( j == s.size()-1 ) // mark the end
+				plot.bigPoint(objectId, gray, x, y, 4);
 		}
 	}
 

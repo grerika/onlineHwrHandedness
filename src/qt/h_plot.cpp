@@ -84,7 +84,7 @@ void Plot::mousePressEvent(QMouseEvent * event)
 	int width = this->width();
 	int height = this->height();
 	if(size != width * height){
-		LOG("Widht and or height changed since plot area allocated.");
+		LOG("Width and or height changed since plot area allocated.");
 		return;
 	}
 
@@ -119,7 +119,7 @@ void Plot::point(int id, QColor col, int x, int y)
 	int width = this->width();
 	int height = this->height();
 	if(size != width * height){
-		LOG("Widht and or height changed since plot area allocated.");
+		LOG("Width and or height changed since plot area allocated.");
 		return;
 	}
 
@@ -141,7 +141,7 @@ void Plot::bigPoint(int id, QColor col, int x, int y, double radius)
 	int width = this->width();
 	int height = this->height();
 	if(size != width * height){
-		LOG("Widht and or height changed since plot area allocated.");
+		LOG("Width and or height changed since plot area allocated.");
 		return;
 	}
 
@@ -165,7 +165,7 @@ void Plot::line(int id, QColor col, int x1, int y1, int x2, int y2, int lineWidt
 	int width = this->width();
 	int height = this->height();
 	if(size != width * height){
-		LOG("Widht and or height changed since plot area allocated.");
+		LOG("Width and or height changed since plot area allocated.");
 		return;
 	}
 
@@ -208,7 +208,7 @@ void Plot::clear()
 	int height = this->height();
 
 	if(size != width * height){
-		LOG("Widht and or height changed since plot area allocated.");
+		LOG("Width and or height changed since plot area allocated.");
 		return;
 	}
 
