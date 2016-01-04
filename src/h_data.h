@@ -55,15 +55,16 @@ public:
 
 	int writerId;
 	QString sampleId;
-	int handedness;
+	QString handedness = QString("");
 	int leftToRightNum;
 	int rightToLeftNum;
+	bool setHandedness(QByteArray & data);	
 	double uncertainty; // maximum allowed wave like move of the hand during drawing straight line
 private:
 	int waveHeight(StrokePoint first, StrokePoint last, StrokePoint third);
 	void setWriterId(QByteArray & data);
 	void setSampleId(QByteArray & data);
-	void setHandedness(QByteArray & data);
+
 	QDomDocument doc;
 };
 

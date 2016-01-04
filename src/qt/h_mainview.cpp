@@ -43,8 +43,11 @@ SCC TidMainWindowDecision    = QT_TRANSLATE_NOOP("MainView", "Decision: %1");
 SCC TidMainWindowUndecided   = QT_TRANSLATE_NOOP("MainView", "undecided");
 SCC TidMainWindowLeftHanded  = QT_TRANSLATE_NOOP("MainView", "left-handed");
 SCC TidMainWindowRightHanded = QT_TRANSLATE_NOOP("MainView", "right-handed");
+SCC TidMainWindowWriterLoadButton = QT_TRANSLATE_NOOP("MainView", "Load writer file");
+SCC TidMainWindowWriterOpenDialog = QT_TRANSLATE_NOOP("MainView", "Open writer file");
 
 MainView::MainView(QWidget *parent) :
+	loadWriterDataBtn(tr(TidMainWindowWriterLoadButton), this),
 	loadDataBtn(tr(TidMainWindowLoadButton), this),
 	saveDataBtn(tr(TidMainWindowSaveButton), this),
 	leftToRightSct(QKeySequence(Qt::Key_J), this),
@@ -56,6 +59,7 @@ MainView::MainView(QWidget *parent) :
 	setWindowIcon(QIcon(Path::icon("handedness.png")));
 	setAttribute(Qt::WA_QuitOnClose, true);
 
+	loadWriterDataBtn.setAutoDefault(false);
 	loadDataBtn.setAutoDefault(false);
 	saveDataBtn.setAutoDefault(false);
 	leftToRightBtn.setText(tr(TidMainWindowLeftToRight));
@@ -80,6 +84,7 @@ MainView::MainView(QWidget *parent) :
 	uncertaintyEdit.setText(QString::number(script.uncertainty));
 
 	connect(qApp, SIGNAL(aboutToQuit()), this, SLOT(close()));
+	connect(&loadWriterDataBtn, SIGNAL(clicked()), this, SLOT(loadWriterDataSlot()));
 	connect(&loadDataBtn, SIGNAL(clicked()), this, SLOT(loadDataSlot()));
 	connect(&saveDataBtn, SIGNAL(clicked()), this, SLOT(saveDataSlot()));
 	connect(&plot, SIGNAL(surfaceCreated()), this, SLOT(redraw()));
@@ -100,6 +105,10 @@ MainView::MainView(QWidget *parent) :
 	//rightToLeftSum.setStyleSheet("QLabel { color : rgb(255, 255, 85); }"); // yellow
 	rightToLeftSum.setStyleSheet("QLabel { color : rgb(0, 0, 255); }");
 
+	QHBoxLayout * openWriterLayout = new QHBoxLayout;
+	openWriterLayout->addWidget(&loadWriterDataBtn);
+	openWriterLayout->addWidget(&loadedWriterFileNameEdit);
+	
 	QHBoxLayout * openLayout = new QHBoxLayout;
 	openLayout->addWidget(&loadDataBtn);
 	openLayout->addWidget(&loadedFileNameEdit);
@@ -140,6 +149,7 @@ MainView::MainView(QWidget *parent) :
 	plotLayout->addLayout(statLayout);
 
 	QVBoxLayout * mainLayout = new QVBoxLayout;
+	mainLayout->addLayout(openWriterLayout);	
 	mainLayout->addLayout(openLayout);
 	mainLayout->addLayout(saveLayout);
 	mainLayout->addLayout(toolLayout);
@@ -163,6 +173,51 @@ MainView::MainView(QWidget *parent) :
 
 MainView::~MainView()
 {
+}
+
+
+
+void MainView::loadWriterDataSlot()
+{
+	if(loadedWriterFileName == ""){
+		loadedWriterFileName = QDir::currentPath();
+		loadedWriterFileNameEdit.setText(loadedWriterFileName);
+	}
+
+	QString fileName = QFileDialog::getOpenFileName(this,
+			tr(TidMainWindowWriterOpenDialog),
+			loadedWriterFileName,//QDir::currentPath(),
+			tr(TidMainWindowFileDialogFilter)
+			);
+	if(fileName == "")
+		return;
+
+	if ( loadedFileName != "" ){
+		QFile file(fileName);
+		if(!file.open(QIODevice::ReadOnly)){
+			QMessageBox::information(this, tr("Information"), tr("Failed to load writer file."));
+			return;
+		}	
+		auto data = file.readAll();
+		data.replace("\r", "");
+
+		if(!script.setHandedness(data)){
+			file.close();
+			QMessageBox::information(this, tr("Information"), tr("Failed to parse xml writer file."));
+			return;
+		}
+		file.close();
+		
+		handednessLabel.setText(tr(TidMainWindowHandedness).arg(script.handedness));
+		if (script.handedness == "Left-handed")
+			handednessLabel.setStyleSheet("QLabel { color : rgb(0, 0, 255); }"); // LEFT
+		else
+			handednessLabel.setStyleSheet("QLabel { color : rgb(120, 80, 40); }"); // RIGHT
+	}
+	loadedWriterFileName = fileName;
+	loadedWriterFileNameEdit.setText(loadedWriterFileName);
+	
+	redraw();
 }
 
 void MainView::loadDataSlot()
@@ -199,8 +254,32 @@ void MainView::loadDataSlot()
 
 	plot.selectedObject = 0;
 	updateStat();
+	
 	writerLabel.setText(tr(TidMainWindowWriter).arg(script.writerId));
 	sampleLabel.setText(tr(TidMainWindowSample).arg(script.sampleId));	
+	
+	if ( loadedWriterFileName != "" ){
+		file.setFileName(loadedWriterFileName);
+		if(!file.open(QIODevice::ReadOnly)){
+			QMessageBox::information(this, tr("Information"), tr("Failed to load writer file."));
+			return;
+		}	
+		auto data2 = file.readAll();
+		data2.replace("\r", "");
+
+		if(!script.setHandedness(data2)){
+			file.close();
+			QMessageBox::information(this, tr("Information"), tr("Failed to parse xml writer file."));
+			return;
+		}
+		file.close();
+		
+		handednessLabel.setText(tr(TidMainWindowHandedness).arg(script.handedness));
+		if (script.handedness == "Left-handed")
+			handednessLabel.setStyleSheet("QLabel { color : rgb(0, 0, 255); }"); // LEFT
+		else
+			handednessLabel.setStyleSheet("QLabel { color : rgb(120, 80, 40); }"); // RIGHT		
+	}
 
 	redraw();
 }

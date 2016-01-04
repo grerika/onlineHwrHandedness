@@ -16,7 +16,7 @@
     <message>
         <location filename="../../src/qt/h_mainview.cpp" line="24"/>
         <source>Open xml file</source>
-        <translation>Xml adatfájl megynitása</translation>
+        <translation>Xml adatfájl megnyitása</translation>
     </message>
     <message>
         <location filename="../../src/qt/h_mainview.cpp" line="25"/>
@@ -117,7 +117,17 @@
         <location filename="../../src/qt/h_mainview.cpp" line="45"/>
         <source>right-handed</source>
         <translation>jobb kezes</translation>
-    </message>   
+    </message> 
+    <message>
+        <location filename="../../src/qt/h_mainview.cpp" line="46"/>
+        <source>Load writer file</source>
+        <translation>Író metafájl betöltése</translation>
+    </message> 
+    <message>
+        <location filename="../../src/qt/h_mainview.cpp" line="47"/>
+        <source>Open writer file</source>
+        <translation>Író metafájl megnyitása </translation>
+    </message>
     <message>
         <location filename="../../src/qt/h_mainview.cpp" line="165"/>
         <location filename="../../src/qt/h_mainview.cpp" line="172"/>

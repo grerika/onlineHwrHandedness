@@ -24,7 +24,7 @@ bool Script::loadXmlData(QByteArray & data)
 			continue;
 
 		Stroke s;
-		
+
 		QDomAttr attr = strokeElem.attributeNode("orientation");
 		if(attr.isNull())
 			s.orientation = Stroke::Orientation::None;
@@ -76,7 +76,6 @@ bool Script::loadXmlData(QByteArray & data)
 	}
 
 	calculateHandednessStat();
-	//setHandedness(data);
 	setWriterId(data);
 	return true;
 }
@@ -119,20 +118,20 @@ QByteArray Script::getXmlData()
 		}
 		strokeSetNode.appendChild(stroke);
 	}
-	
+
 	// set writerId and sampleId
-	QDomNodeList formNodes = docElem.elementsByTagName("Form");	
-	QDomAttr attr = formNodes.item(0).toElement().attributeNode("writerID");	
+	QDomNodeList formNodes = docElem.elementsByTagName("Form");
+	QDomAttr attr = formNodes.item(0).toElement().attributeNode("writerID");
 	if(attr.isNull())
 		writerId = -1;
 	else
 		writerId = attr.value().toInt();
 	attr = formNodes.item(0).toElement().attributeNode("id");
 	if(attr.isNull())
-		sampleId = "-1"
+		sampleId = "Missing writer id";
 	else
-		sampleId = attr.value();	
-				
+		sampleId = attr.value();
+	LOG("SampleId '%'", sampleId);
 	return doc.toByteArray(2);
 }
 
@@ -143,39 +142,61 @@ void Script::setWriterId(QByteArray & data)
 		writerId = -1;
 	}else{	// determine writerid
 		QDomElement docElem      = doc.documentElement();
-		QDomNodeList strokeNodes = docElem.elementsByTagName("Form");	
-		QDomAttr attr = strokeNodes.item(0).toElement().attributeNode("writerID");	
+		QDomNodeList strokeNodes = docElem.elementsByTagName("Form");
+		QDomAttr attr = strokeNodes.item(0).toElement().attributeNode("writerID");
 		if(attr.isNull())
 			writerId = -2;
 		else
 			writerId = attr.value().toInt();
 	}
 	setSampleId(data);
+	LOG("writerId '%'", writerId);
+	LOG("SampleId '%'", sampleId);
 }
 
 void Script::setSampleId(QByteArray & data)
 {
 	sampleId = "0";
 	if(!doc.setContent(data)){
-		sampleId = "-1";
+		sampleId = "Invalid data file";
 	}else{	// determine sampleId
 		QDomElement docElem      = doc.documentElement();
-		QDomNodeList strokeNodes = docElem.elementsByTagName("Form");	
-		QDomAttr attr = strokeNodes.item(0).toElement().attributeNode("id");	
+		QDomNodeList strokeNodes = docElem.elementsByTagName("Form");
+		QDomAttr attr = strokeNodes.item(0).toElement().attributeNode("id");
 		if(attr.isNull())
-			sampleId = "-2";
+			sampleId = "Form element's id attirbute is empty";
 		else
 			sampleId = attr.value();
 	}
 }
 
-void Script::setHandedness(QByteArray & data)
+bool Script::setHandedness(QByteArray & data)
 {
+	handedness = "Missing";
 	if(!doc.setContent(data)){
-		handedness = -1;
+		handedness = "Invalid data file";
 	}else{
-		handedness = 0;
+		QDomElement docElem      = doc.documentElement();
+		QDomNodeList writerNodes = docElem.elementsByTagName("Writer");
+		for(int i=0; i<writerNodes.length(); i++){
+			QDomElement writerElem = writerNodes.item(i).toElement();
+			if(writerElem.isNull())
+				continue;
+
+			int attrWriterID = writerElem.attributeNode("name").value().toInt();
+			if (attrWriterID == writerId){
+				QDomAttr attr = writerElem.attributeNode("WritingType");
+				if(attr.isNull()){
+					handedness = "Missing WritingType data";
+				}else{
+					handedness = attr.value().toLower();
+					LOG("handedness: '%'",handedness);
+					return true;
+				}
+			}
+		}
 	}
+	return false;
 }
 
 void Script::calculateHandednessStat()

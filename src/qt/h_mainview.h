@@ -36,6 +36,7 @@ private:
 	void retranslate();
 
 private slots:
+	void loadWriterDataSlot();
 	void loadDataSlot();
 	void saveDataSlot();
 	void redraw();
@@ -51,11 +52,14 @@ private slots:
 	QString orientationToText(enum Stroke::Orientation orient);
 
 private:
+	QString loadedWriterFileName;
 	QString loadedFileName;
 	QString saveFileName;
 	Script script;
 
 	Plot plot;
+	QPushButton loadWriterDataBtn;
+	QLineEdit loadedWriterFileNameEdit;	
 	QPushButton loadDataBtn;
 	QLineEdit loadedFileNameEdit;
 	QPushButton saveDataBtn;
