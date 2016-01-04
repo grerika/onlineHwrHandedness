@@ -48,15 +48,22 @@ public:
 
 	bool loadXmlData(QByteArray & data);
 	QByteArray getXmlData();
+
 	void calculateHandednessStat();
 	void calculateHandedness();
 	void clearAllOrientation();
 
+	int writerId;
+	QString sampleId;
+	int handedness;
 	int leftToRightNum;
 	int rightToLeftNum;
 	double uncertainty; // maximum allowed wave like move of the hand during drawing straight line
 private:
 	int waveHeight(StrokePoint first, StrokePoint last, StrokePoint third);
+	void setWriterId(QByteArray & data);
+	void setSampleId(QByteArray & data);
+	void setHandedness(QByteArray & data);
 	QDomDocument doc;
 };
 

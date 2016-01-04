@@ -76,6 +76,8 @@ bool Script::loadXmlData(QByteArray & data)
 	}
 
 	calculateHandednessStat();
+	//setHandedness(data);
+	setWriterId(data);
 	return true;
 }
 
@@ -117,7 +119,63 @@ QByteArray Script::getXmlData()
 		}
 		strokeSetNode.appendChild(stroke);
 	}
+	
+	// set writerId and sampleId
+	QDomNodeList formNodes = docElem.elementsByTagName("Form");	
+	QDomAttr attr = formNodes.item(0).toElement().attributeNode("writerID");	
+	if(attr.isNull())
+		writerId = -1;
+	else
+		writerId = attr.value().toInt();
+	attr = formNodes.item(0).toElement().attributeNode("id");
+	if(attr.isNull())
+		sampleId = "-1"
+	else
+		sampleId = attr.value();	
+				
 	return doc.toByteArray(2);
+}
+
+void Script::setWriterId(QByteArray & data)
+{
+	writerId = 0;
+	if(!doc.setContent(data)){
+		writerId = -1;
+	}else{	// determine writerid
+		QDomElement docElem      = doc.documentElement();
+		QDomNodeList strokeNodes = docElem.elementsByTagName("Form");	
+		QDomAttr attr = strokeNodes.item(0).toElement().attributeNode("writerID");	
+		if(attr.isNull())
+			writerId = -2;
+		else
+			writerId = attr.value().toInt();
+	}
+	setSampleId(data);
+}
+
+void Script::setSampleId(QByteArray & data)
+{
+	sampleId = "0";
+	if(!doc.setContent(data)){
+		sampleId = "-1";
+	}else{	// determine sampleId
+		QDomElement docElem      = doc.documentElement();
+		QDomNodeList strokeNodes = docElem.elementsByTagName("Form");	
+		QDomAttr attr = strokeNodes.item(0).toElement().attributeNode("id");	
+		if(attr.isNull())
+			sampleId = "-2";
+		else
+			sampleId = attr.value();
+	}
+}
+
+void Script::setHandedness(QByteArray & data)
+{
+	if(!doc.setContent(data)){
+		handedness = -1;
+	}else{
+		handedness = 0;
+	}
 }
 
 void Script::calculateHandednessStat()

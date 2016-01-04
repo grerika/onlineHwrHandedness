@@ -34,10 +34,11 @@ SCC TidMainWindowStatLeftToRight = QT_TRANSLATE_NOOP("MainView", "Left to right:
 SCC TidMainWindowStatRightToLeft = QT_TRANSLATE_NOOP("MainView", "Right to left: %1");
 SCC TidMainWindowStatObjectId = QT_TRANSLATE_NOOP("MainView", "Stroke id: %1");
 SCC TidMainWindowStatOrientation = QT_TRANSLATE_NOOP("MainView", "Orientation: %1");
-
 SCC TidMainWindowUncertainty = QT_TRANSLATE_NOOP("MainView", "Uncertainty of handmove:");
 
-SCC TidMainWindowHandedness    = QT_TRANSLATE_NOOP("MainView", "Handedness: %1");
+SCC TidMainWindowWriter      = QT_TRANSLATE_NOOP("MainView", "WriterID: %1");
+SCC TidMainWindowSample      = QT_TRANSLATE_NOOP("MainView", "SampleID: %1");
+SCC TidMainWindowHandedness  = QT_TRANSLATE_NOOP("MainView", "Handedness: %1");
 SCC TidMainWindowDecision    = QT_TRANSLATE_NOOP("MainView", "Decision: %1");
 SCC TidMainWindowUndecided   = QT_TRANSLATE_NOOP("MainView", "undecided");
 SCC TidMainWindowLeftHanded  = QT_TRANSLATE_NOOP("MainView", "left-handed");
@@ -66,9 +67,11 @@ MainView::MainView(QWidget *parent) :
 	rightToLeftSum.setText(tr(TidMainWindowStatRightToLeft).arg(0));
 	objectIdLabel.setText(tr(TidMainWindowStatObjectId).arg(0));
 	orientationLabel.setText(tr(TidMainWindowStatOrientation).arg(0));
+
+	writerLabel.setText(tr(TidMainWindowWriter).arg(0));
+	sampleLabel.setText(tr(TidMainWindowSample).arg(0));	
 	handednessLabel.setText(tr(TidMainWindowHandedness).arg(0));
 	decisionLabel.setText(tr(TidMainWindowDecision).arg(0));
-
 
 	calcHandednessBtn.setText(tr(TidMainWindowCalcHandedness));
 	uncertaintyLabel.setText(tr(TidMainWindowUncertainty).arg(0));
@@ -114,6 +117,8 @@ MainView::MainView(QWidget *parent) :
 
 	QVBoxLayout * statLayout = new QVBoxLayout;
 
+	statLayout->addWidget(&writerLabel);
+	statLayout->addWidget(&sampleLabel);
 	statLayout->addWidget(&handednessLabel);
 	statLayout->addStretch(1);
 	statLayout->addWidget(&leftToRightSum);
@@ -194,6 +199,8 @@ void MainView::loadDataSlot()
 
 	plot.selectedObject = 0;
 	updateStat();
+	writerLabel.setText(tr(TidMainWindowWriter).arg(script.writerId));
+	sampleLabel.setText(tr(TidMainWindowSample).arg(script.sampleId));	
 
 	redraw();
 }
@@ -223,6 +230,7 @@ void MainView::saveDataSlot()
 		return;
 	}
 	auto data = script.getXmlData();
+	writerLabel.setText(tr(TidMainWindowWriter).arg(script.writerId));	
 	if(file.write(data) == -1){
 		file.close();
 		QMessageBox::information(this, tr("Information"), tr("Failed to write xml file."));

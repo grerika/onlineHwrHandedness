@@ -84,27 +84,37 @@
         <translation>Kézmozgás bizonytalansága:</translation>
     </message>
    <message>
-        <location filename="../../src/qt/h_mainview.cpp" line="23"/>
+        <location filename="../../src/qt/h_mainview.cpp" line="39"/>
+        <source>WriterID: %1</source>
+        <translation>Író: %1</translation>
+    </message>
+    <message>
+        <location filename="../../src/qt/h_mainview.cpp" line="40"/>
+        <source>SampleID: %1</source>
+        <translation>Minta: %1</translation>
+    </message>
+    <message>
+        <location filename="../../src/qt/h_mainview.cpp" line="41"/>
         <source>Handedness: %1</source>
         <translation>Kezesség: %1</translation>
     </message>       
    <message>
-        <location filename="../../src/qt/h_mainview.cpp" line="23"/>
+        <location filename="../../src/qt/h_mainview.cpp" line="42"/>
         <source>Decision: %1</source>
         <translation>Döntés: %1</translation>
     </message>    
    <message>
-        <location filename="../../src/qt/h_mainview.cpp" line="23"/>
-        <source>undecided handedness</source>
+        <location filename="../../src/qt/h_mainview.cpp" line="43"/>
+        <source>undecided</source>
         <translation>eldöntetlen</translation>
     </message>  
     <message>
-        <location filename="../../src/qt/h_mainview.cpp" line="23"/>
+        <location filename="../../src/qt/h_mainview.cpp" line="44"/>
         <source>left-handed</source>
         <translation>bal kezes</translation>
     </message>
    <message>
-        <location filename="../../src/qt/h_mainview.cpp" line="23"/>
+        <location filename="../../src/qt/h_mainview.cpp" line="45"/>
         <source>right-handed</source>
         <translation>jobb kezes</translation>
     </message>   
