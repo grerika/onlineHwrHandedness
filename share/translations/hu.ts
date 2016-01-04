@@ -101,7 +101,7 @@
    <message>
         <location filename="../../src/qt/h_mainview.cpp" line="23"/>
         <source>right-handed</source>
-        <translation>kobb kezes</translation>
+        <translation>jobb kezes</translation>
     </message>   
     <message>
         <location filename="../../src/qt/h_mainview.cpp" line="165"/>
