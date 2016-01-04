@@ -85,8 +85,13 @@
     </message>
    <message>
         <location filename="../../src/qt/h_mainview.cpp" line="23"/>
-        <source>Decision</source>
-        <translation>Döntés</translation>
+        <source>Handedness: %1</source>
+        <translation>Kezesség: %1</translation>
+    </message>       
+   <message>
+        <location filename="../../src/qt/h_mainview.cpp" line="23"/>
+        <source>Decision: %1</source>
+        <translation>Döntés: %1</translation>
     </message>    
    <message>
         <location filename="../../src/qt/h_mainview.cpp" line="23"/>
