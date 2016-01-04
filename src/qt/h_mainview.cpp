@@ -34,7 +34,14 @@ SCC TidMainWindowStatLeftToRight = QT_TRANSLATE_NOOP("MainView", "Left to right:
 SCC TidMainWindowStatRightToLeft = QT_TRANSLATE_NOOP("MainView", "Right to left: %1");
 SCC TidMainWindowStatObjectId = QT_TRANSLATE_NOOP("MainView", "Stroke id: %1");
 SCC TidMainWindowStatOrientation = QT_TRANSLATE_NOOP("MainView", "Orientation: %1");
+
 SCC TidMainWindowUncertainty = QT_TRANSLATE_NOOP("MainView", "Uncertainty of handmove:");
+
+SCC TidMainWindowHandedness    = QT_TRANSLATE_NOOP("MainView", "Handedness: %1");
+SCC TidMainWindowDecision    = QT_TRANSLATE_NOOP("MainView", "Decision: %1");
+SCC TidMainWindowUndecided   = QT_TRANSLATE_NOOP("MainView", "undecided");
+SCC TidMainWindowLeftHanded  = QT_TRANSLATE_NOOP("MainView", "left-handed");
+SCC TidMainWindowRightHanded = QT_TRANSLATE_NOOP("MainView", "right-handed");
 
 MainView::MainView(QWidget *parent) :
 	loadDataBtn(tr(TidMainWindowLoadButton), this),
@@ -59,6 +66,9 @@ MainView::MainView(QWidget *parent) :
 	rightToLeftSum.setText(tr(TidMainWindowStatRightToLeft).arg(0));
 	objectIdLabel.setText(tr(TidMainWindowStatObjectId).arg(0));
 	orientationLabel.setText(tr(TidMainWindowStatOrientation).arg(0));
+	handednessLabel.setText(tr(TidMainWindowHandedness).arg(0));
+	decisionLabel.setText(tr(TidMainWindowDecision).arg(0));
+
 
 	calcHandednessBtn.setText(tr(TidMainWindowCalcHandedness));
 	uncertaintyLabel.setText(tr(TidMainWindowUncertainty).arg(0));
@@ -103,17 +113,22 @@ MainView::MainView(QWidget *parent) :
 	toolLayout->addStretch(1);
 
 	QVBoxLayout * statLayout = new QVBoxLayout;
+
+	statLayout->addWidget(&handednessLabel);
+	statLayout->addStretch(1);
+	statLayout->addWidget(&leftToRightSum);
+	statLayout->addWidget(&rightToLeftSum);
+	statLayout->addWidget(&decisionLabel);
+	statLayout->addStretch(1);	
+	
 	statLayout->addWidget(&calcHandednessBtn);
 	statLayout->addWidget(&uncertaintyLabel);
 	statLayout->addWidget(&uncertaintyEdit);
 	statLayout->addWidget(&clearAllOrientationBtn);
 	statLayout->addStretch(1);
-	statLayout->addWidget(&leftToRightSum);
-	statLayout->addWidget(&rightToLeftSum);
-	statLayout->addStretch(1);
 	statLayout->addWidget(&objectIdLabel);
 	statLayout->addWidget(&orientationLabel);
-	statLayout->addStretch(5);
+	statLayout->addStretch(1);	
 
 	QHBoxLayout * plotLayout = new QHBoxLayout;
 	plotLayout->addWidget(&plot);
@@ -333,6 +348,19 @@ void MainView::updateStat()
 				  orientationToText(script[plot.selectedObject-1].orientation)));
 	else
 		orientationLabel.setText(tr(TidMainWindowStatOrientation).arg(""));
+
+	if (script.rightToLeftNum + script.leftToRightNum == 0 ){
+		decisionLabel.setText(tr(TidMainWindowDecision).arg(tr(TidMainWindowUndecided)));
+		decisionLabel.setStyleSheet("QLabel { color : rgb(0, 100, 0); }"); // undec - gren		
+	}else{
+		if (script.rightToLeftNum > 0){
+			decisionLabel.setText(tr(TidMainWindowDecision).arg(tr(TidMainWindowLeftHanded)));
+			decisionLabel.setStyleSheet("QLabel { color : rgb(0, 0, 255); }"); // LEFT
+		}else{
+			decisionLabel.setText(tr(TidMainWindowDecision).arg(tr(TidMainWindowRightHanded)));
+			decisionLabel.setStyleSheet("QLabel { color : rgb(120, 80, 40); }"); // RIGHT
+		}
+	}
 }
 
 void MainView::updateCursor()
@@ -343,6 +371,19 @@ void MainView::updateCursor()
 				  orientationToText(script[plot.selectedObject-1].orientation)));
 	else
 		orientationLabel.setText(tr(TidMainWindowStatOrientation).arg(""));
+
+	if (script.rightToLeftNum + script.leftToRightNum == 0 ){
+		decisionLabel.setText(tr(TidMainWindowDecision).arg(tr(TidMainWindowUndecided)));
+		decisionLabel.setStyleSheet("QLabel { color : rgb(0, 100, 0); }"); // undec - gren		
+	}else{
+		if (script.rightToLeftNum > 0){
+			decisionLabel.setText(tr(TidMainWindowDecision).arg(tr(TidMainWindowLeftHanded)));
+			decisionLabel.setStyleSheet("QLabel { color : rgb(0, 0, 255); }"); // LEFT
+		}else{
+			decisionLabel.setText(tr(TidMainWindowDecision).arg(tr(TidMainWindowRightHanded)));
+			decisionLabel.setStyleSheet("QLabel { color : rgb(120, 80, 40); }"); // RIGHT
+		}
+	}
 	redraw();
 }
 

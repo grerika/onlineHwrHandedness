@@ -83,6 +83,26 @@
         <source>Uncertainty of handmove:</source>
         <translation>Kézmozgás bizonytalansága:</translation>
     </message>
+   <message>
+        <location filename="../../src/qt/h_mainview.cpp" line="23"/>
+        <source>Decision</source>
+        <translation>Döntés</translation>
+    </message>    
+   <message>
+        <location filename="../../src/qt/h_mainview.cpp" line="23"/>
+        <source>undecided handedness</source>
+        <translation>eldöntetlen</translation>
+    </message>  
+    <message>
+        <location filename="../../src/qt/h_mainview.cpp" line="23"/>
+        <source>left-handed</source>
+        <translation>bal kezes</translation>
+    </message>
+   <message>
+        <location filename="../../src/qt/h_mainview.cpp" line="23"/>
+        <source>right-handed</source>
+        <translation>kobb kezes</translation>
+    </message>   
     <message>
         <location filename="../../src/qt/h_mainview.cpp" line="165"/>
         <location filename="../../src/qt/h_mainview.cpp" line="172"/>

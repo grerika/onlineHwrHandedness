@@ -74,7 +74,9 @@ private:
 	QLabel rightToLeftSum;
 	QLabel objectIdLabel;
 	QLabel orientationLabel;
-
+	QLabel handednessLabel;	
+	QLabel decisionLabel;
+	
 	QToolButton clearAllOrientationBtn;
 	QLabel uncertaintyLabel;
 	QLineEdit uncertaintyEdit;
