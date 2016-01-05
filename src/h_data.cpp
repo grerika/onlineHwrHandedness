@@ -74,10 +74,95 @@ bool Script::loadXmlData(QByteArray & data)
 
 		append(s);
 	}
+	for(int i=0,j=removeNoise();i<5 && j>0;i++,j=removeNoise())
+		LOG("%. iteration, % removed points",i,j);
 
 	calculateHandednessStat();
 	setWriterId(data);
 	return true;
+}
+
+double Script::averageStrokeSize()
+{
+	double ret = 0.0;
+	for(int i=0; i<size(); i++){
+		Stroke s = at(i);
+		ret += s.size();
+	}
+	if (size() != 0)
+		ret = ret/size();
+
+	return ret;
+}
+
+double Script::averageStrokeDiagonal()
+{
+	double ret = 0.0;
+	for(int i=0; i<size(); i++){
+		Stroke s = at(i);
+		ret += s.diagonal();
+	}
+	if (size() != 0)
+		ret = ret/size();
+
+	return ret;
+}
+
+double Script::averageStrokeHeight()
+{
+	double ret = 0.0;
+	for(int i=0; i<size(); i++){
+		Stroke s = at(i);
+		ret += s.height();
+	}
+	if (size() != 0)
+		ret = ret/size();
+
+	return ret;
+}
+
+double Script::averageStrokeWidth()
+{
+	double ret = 0.0;
+	for(int i=0; i<size(); i++){
+		Stroke s = at(i);
+		ret += s.width();
+	}
+	if (size() != 0)
+		ret = ret/size();
+
+	return ret;
+}
+
+int Script::removeNoise()
+{
+	int cnt=0;
+
+	double maxHeight = averageStrokeHeight();
+	double maxWidth  = averageStrokeWidth();
+
+	bool boolRemovedPoint;
+	for(int i=0; i<size(); i++){
+		Stroke s = at(i);
+		boolRemovedPoint = false;
+		for (int j=1;j<s.size();j++){
+			StrokePoint p = s.at(j);
+			StrokePoint pPrev = s.at(j-1);
+			double pHeight = abs(pPrev.y-p.y);
+			double pWidth  = abs(pPrev.x-p.x);
+			if (pHeight+pWidth > 2*(maxHeight + maxWidth)) {
+				LOG("\tRemove point %th from stroke %th (height: %, width: %)", j,i,pHeight,pWidth);
+				s.removeAt(j);
+				boolRemovedPoint = true;
+				cnt++;
+				j--;
+			}
+		}
+		if ( boolRemovedPoint )
+			replace(i,s);
+	}
+
+	return cnt;
 }
 
 QByteArray Script::getXmlData()
@@ -119,6 +204,8 @@ QByteArray Script::getXmlData()
 		}
 		strokeSetNode.appendChild(stroke);
 	}
+	for(int i=0,j=removeNoise();i<5 && j>0;i++,j=removeNoise())
+		LOG("%. iteration, % removed points",i,j);
 
 	// set writerId and sampleId
 	QDomNodeList formNodes = docElem.elementsByTagName("Form");
@@ -242,12 +329,26 @@ void Script::calculateHandedness()
 		Stroke & s = (*this)[i];
 		if(s.orientation != Stroke::Orientation::None)
 			continue;
-		if(s.size() < limit)
+
+		double avgDiagonal = averageStrokeDiagonal();
+		// filter too small strokes (probably meant to be points)
+		if(s.diagonal() < 0.25*avgDiagonal)
+			continue;
+
+		// filter too big variance in slope
+		double sdSlope = s.sdSlope();
+		// 0.3 (radian) default uncertainty ~ 17.2 degree
+		if(uncertainty < sdSlope)
+			continue;
+		// filter too much slant
+		double avgSlope = s.avgSlope();
+		if(1.5*uncertainty < avgSlope)
 			continue;
 
 		StrokePoint & first = s[0];
 		StrokePoint & last = s[s.size()-1];
 
+/*
 		int maxDistance = 0;
 		for(int j=1; j<s.size(); j++){
 			StrokePoint & p = s[j];
@@ -266,18 +367,111 @@ void Script::calculateHandedness()
 		degree = rad / 3.14159265 * 180.0;
 		if(40 < qAbs(degree))
 			continue;
-
-		// filter too short strokes (probably meant to be points)
-		double d = DISTANCE(first.x, first.y, last.x, last.y);
-		if(d < uncertainty)
-			continue;
-
-
+*/
 		if(first.x < last.x)
 			s.orientation = Stroke::Orientation::LeftToRight;
 		else
 			s.orientation = Stroke::Orientation::RightToLeft;
 	}
 	calculateHandednessStat();
+}
+
+
+double Stroke::minX()
+{
+	double ret = at(0).x;
+	for(int i=0;i<size();i++){
+		StrokePoint p = at(i);
+		if ( ret > p.x )
+			ret = p.x;
+	}
+	return ret;
+}
+
+double Stroke::minY()
+{
+	double ret = at(0).y;
+	for(int i=0;i<size();i++){
+		StrokePoint p = at(i);
+		if ( ret > p.y )
+			ret = p.y;
+	}
+	return ret;
+}
+
+double Stroke::maxX()
+{
+	double ret = 0;
+	for(int i=0;i<size();i++){
+		StrokePoint p = at(i);
+		if ( ret < p.x )
+			ret = p.x;
+	}
+	return ret;
+}
+
+double Stroke::maxY()
+{
+	double ret = 0;
+	for(int i=0;i<size();i++){
+		StrokePoint p = at(i);
+		if ( ret < p.y )
+			ret = p.y;
+	}
+	return ret;
+}
+
+
+double Stroke::height()
+{
+	return maxY()-minY();
+}
+
+double Stroke::width()
+{
+	return  maxX()-minX();
+}
+
+
+
+double Stroke::avgSlope()
+{
+	double ret = 0.0;
+	int cnt = 0;
+	for(int i=1;i<size();i++){
+		if ( abs(at(i).x-at(i-1).x)>0.0001){
+			ret += (at(i).y-at(i-1).y)/(at(i).x-at(i-1).x);
+			cnt++;
+		}
+	}
+	ret /= cnt;
+	return  ret;
+}
+
+double Stroke::sdSlope()
+{
+	double avg = avgSlope();
+
+	return  sqrt(avg2Slope()+pow(avg,2));
+}
+
+double Stroke::avg2Slope()
+{
+	double ret = 0.0;
+	int cnt = 0;
+	for(int i=1;i<size();i++){
+		if ( abs(at(i).x-at(i-1).x)>0.0001){
+			double slope = (at(i).y-at(i-1).y)/(at(i).x-at(i-1).x);
+			ret += pow(slope,2);
+			cnt++;
+		}
+	}
+	ret /= cnt;
+	return  ret;
+}
+
+double Stroke::diagonal()
+{
+	return DISTANCE(minX(),minY(),maxX(),maxY());
 }
 

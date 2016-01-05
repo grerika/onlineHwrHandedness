@@ -39,12 +39,23 @@ public:
 	QString colour;
 	double start_time;
 	double end_time;
+	double sdSlope();
+	double avgSlope();
+	double diagonal();
+	double width();
+	double height();
+private:
+	double avg2Slope();
+	double minX();
+	double maxX();
+	double minY();
+	double maxY();
 };
 
 class Script : public QList<Stroke>
 {
 public:
-	Script() : leftToRightNum(0), rightToLeftNum(0), uncertainty(30.0) {}
+	Script() : leftToRightNum(0), rightToLeftNum(0), uncertainty(0.3) {}
 
 	bool loadXmlData(QByteArray & data);
 	QByteArray getXmlData();
@@ -53,18 +64,24 @@ public:
 	void calculateHandedness();
 	void clearAllOrientation();
 
+
 	int writerId;
 	QString sampleId;
 	QString handedness = QString("");
 	int leftToRightNum;
 	int rightToLeftNum;
-	bool setHandedness(QByteArray & data);	
+	bool setHandedness(QByteArray & data);
 	double uncertainty; // maximum allowed wave like move of the hand during drawing straight line
 	const int limit = 5; // minimal length for oriented strokes
 private:
 	int waveHeight(StrokePoint first, StrokePoint last, StrokePoint third);
 	void setWriterId(QByteArray & data);
 	void setSampleId(QByteArray & data);
+	double averageStrokeHeight();
+	double averageStrokeWidth();
+	double averageStrokeDiagonal();
+	double averageStrokeSize();
+	int removeNoise();
 
 	QDomDocument doc;
 };

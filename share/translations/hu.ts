@@ -80,8 +80,8 @@
     </message>
     <message>
         <location filename="../../src/qt/h_mainview.cpp" line="37"/>
-        <source>Uncertainty of handmove:</source>
-        <translation>Kézmozgás bizonytalansága:</translation>
+        <source>Max SD of slope:</source>
+        <translation>Meredekség maximális szórása:</translation>
     </message>
    <message>
         <location filename="../../src/qt/h_mainview.cpp" line="39"/>

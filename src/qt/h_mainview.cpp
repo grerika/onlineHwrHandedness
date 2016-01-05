@@ -34,7 +34,7 @@ SCC TidMainWindowStatLeftToRight = QT_TRANSLATE_NOOP("MainView", "Left to right:
 SCC TidMainWindowStatRightToLeft = QT_TRANSLATE_NOOP("MainView", "Right to left: %1");
 SCC TidMainWindowStatObjectId = QT_TRANSLATE_NOOP("MainView", "Stroke id: %1");
 SCC TidMainWindowStatOrientation = QT_TRANSLATE_NOOP("MainView", "Orientation: %1");
-SCC TidMainWindowUncertainty = QT_TRANSLATE_NOOP("MainView", "Uncertainty of handmove:");
+SCC TidMainWindowUncertainty = QT_TRANSLATE_NOOP("MainView", "Max SD of slope:");
 
 SCC TidMainWindowWriter      = QT_TRANSLATE_NOOP("MainView", "WriterID: %1");
 SCC TidMainWindowSample      = QT_TRANSLATE_NOOP("MainView", "SampleID: %1");
@@ -209,7 +209,7 @@ void MainView::loadWriterDataSlot()
 		file.close();
 		
 		handednessLabel.setText(tr(TidMainWindowHandedness).arg(script.handedness));
-		if (script.handedness == "Left-handed")
+		if (script.handedness == "left-handed")
 			handednessLabel.setStyleSheet("QLabel { color : rgb(0, 0, 255); }"); // LEFT
 		else
 			handednessLabel.setStyleSheet("QLabel { color : rgb(120, 80, 40); }"); // RIGHT
@@ -275,7 +275,7 @@ void MainView::loadDataSlot()
 		file.close();
 		
 		handednessLabel.setText(tr(TidMainWindowHandedness).arg(script.handedness));
-		if (script.handedness == "Left-handed")
+		if (script.handedness == "left-handed")
 			handednessLabel.setStyleSheet("QLabel { color : rgb(0, 0, 255); }"); // LEFT
 		else
 			handednessLabel.setStyleSheet("QLabel { color : rgb(120, 80, 40); }"); // RIGHT		
