@@ -99,7 +99,7 @@ QByteArray Script::getXmlData()
 		stroke.setAttribute("colour", s.colour);
 		stroke.setAttribute("start_time", s.start_time);
 		stroke.setAttribute("end_time", s.end_time);
-		if ( s.length() > limit )
+		if ( s.length() >= limit )
 			switch(s.orientation){
 				case Stroke::Orientation::LeftToRight :
 					stroke.setAttribute("orientation", "leftToRight");
@@ -206,7 +206,7 @@ void Script::calculateHandednessStat()
 	rightToLeftNum = 0;
 	for(int i=0; i<size(); i++){
 		Stroke s = at(i);
-		if ( s.length() <= limit )
+		if ( s.length() < limit )
 			continue;
 		switch(s.orientation){
 			case Stroke::Orientation::LeftToRight :
@@ -242,7 +242,7 @@ void Script::calculateHandedness()
 		Stroke & s = (*this)[i];
 		if(s.orientation != Stroke::Orientation::None)
 			continue;
-		if(s.size() < 2)
+		if(s.size() < limit)
 			continue;
 
 		StrokePoint & first = s[0];
