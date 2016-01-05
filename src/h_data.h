@@ -60,6 +60,7 @@ public:
 	int rightToLeftNum;
 	bool setHandedness(QByteArray & data);	
 	double uncertainty; // maximum allowed wave like move of the hand during drawing straight line
+	const int limit = 5; // minimal length for oriented strokes
 private:
 	int waveHeight(StrokePoint first, StrokePoint last, StrokePoint third);
 	void setWriterId(QByteArray & data);

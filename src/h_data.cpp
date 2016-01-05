@@ -99,15 +99,16 @@ QByteArray Script::getXmlData()
 		stroke.setAttribute("colour", s.colour);
 		stroke.setAttribute("start_time", s.start_time);
 		stroke.setAttribute("end_time", s.end_time);
-		switch(s.orientation){
-			case Stroke::Orientation::LeftToRight :
-				stroke.setAttribute("orientation", "leftToRight");
-				break;
-			case Stroke::Orientation::RightToLeft :
-				stroke.setAttribute("orientation", "rightToLeft");
-				break;
-			default: break;
-		}
+		if ( s.length() > limit )
+			switch(s.orientation){
+				case Stroke::Orientation::LeftToRight :
+					stroke.setAttribute("orientation", "leftToRight");
+					break;
+				case Stroke::Orientation::RightToLeft :
+					stroke.setAttribute("orientation", "rightToLeft");
+					break;
+				default: break;
+			}
 		for(int j=0; j<s.size(); j++){
 			StrokePoint & p = s[j];
 			QDomElement point = doc.createElement("Point");
@@ -205,6 +206,8 @@ void Script::calculateHandednessStat()
 	rightToLeftNum = 0;
 	for(int i=0; i<size(); i++){
 		Stroke s = at(i);
+		if ( s.length() <= limit )
+			continue;
 		switch(s.orientation){
 			case Stroke::Orientation::LeftToRight :
 				leftToRightNum++;
