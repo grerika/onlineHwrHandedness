@@ -6,7 +6,9 @@
 #include <stdio.h>
 #include <QtGui>
 
+#ifdef __MINGW32__
 Q_IMPORT_PLUGIN(QWindowsIntegrationPlugin)
+#endif
 
 #include "h_application.h"
 #include "h_mainview.h"
