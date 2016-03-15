@@ -17,7 +17,7 @@ PRJDESCRIPTION=" Handwrite analytics\
 
 DEVELOPMENT_START_YEAR=2015
 
-AUTHOR="Császár Péter and Griechisch Erika"
+AUTHOR="Peter Csaszar (Császár Péter) and Erika Griechisch (Griechisch Erika)"
 EMAIL=onlinehandwritinghandedness@gmail.com
 ORGANIZATION="Peter Csaszar"
 ORGANIZATION_DOMAIN_NAME="csjpeter.eu"
