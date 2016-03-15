@@ -14,6 +14,8 @@ JOBS=$(expr $(cat /proc/cpuinfo | grep processor | wc -l) + 1)
 source /etc/lsb-release
 source config
 
+export QT_SELECT=qt5
+
 function exec_in_dir ()
 {
 	pushd $1 > /dev/null || exit $?
