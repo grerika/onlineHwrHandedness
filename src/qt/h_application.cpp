@@ -36,7 +36,8 @@ MainView & Application::mainView()
 void Application::loadTranslation(QString lang)
 {
 	if(lang == ""){
-		QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+		QProcessEnvironment env =
+				QProcessEnvironment::systemEnvironment();
 		lang = env.value("LANG", "en").left(2);
 		if(lang != "hu")
 			lang = "en";
@@ -65,47 +66,52 @@ bool Application::notify(QObject * receiver, QEvent * event)
 	try {
 		switch(event->type()){
 		case QEvent::KeyPress:
-			{
-				QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
+		{
+			QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
 
-				if(keyEvent->matches(QKeySequence::Quit)){
-					if(mainViewPtr)
-						mainViewPtr->close();
-					else
-						quit();
-					break;
-				}
-
-				if(keyEvent->key() == Qt::Key_Alt && altPressed == true)
-					return true;//repeated alt press QT BUG return as if handled
+			if(keyEvent->matches(QKeySequence::Quit)){
+				if(mainViewPtr)
+					mainViewPtr->close();
 				else
-					altPressed = true;
-				/*DBG("Key press % for %:%",
-						keyEvent,
-						receiver->metaObject()->className(), receiver);*/
+					quit();
+				break;
 			}
-			break;
+
+			if(keyEvent->key() == Qt::Key_Alt && altPressed == true)
+				//repeated alt press QT BUG return as if handled
+				return true;
+			else
+				altPressed = true;
+			/*DBG("Key press % for %:%",
+					keyEvent,
+					receiver->metaObject()->className(),
+					receiver);*/
+		}
+		break;
 		case QEvent::KeyRelease:
-			{
-				QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
-				if(keyEvent->key() == Qt::Key_Alt)
-					altPressed = false;
-				/*DBG("Key release % for %:%",
-						keyEvent->key(),
-						receiver->metaObject()->className(), receiver);*/
-			}
-			break;
+		{
+			QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
+			if(keyEvent->key() == Qt::Key_Alt)
+				altPressed = false;
+			/*DBG("Key release % for %:%",
+					keyEvent->key(),
+					receiver->metaObject()->className(),
+					receiver);*/
+		}
+		break;
 		case QEvent::MouseButtonPress:
 		case QEvent::MouseButtonRelease:
 #ifdef DEBUG
-/*			{
-				QMouseEvent* const mouseEvent = static_cast<QMouseEvent*>(event);
-				QPoint pos = mouseEvent->globalPos();
-				DBG("Mouse event at %, % for %:%",
-						pos.x(), pos.y(),
-						receiver->metaObject()->className(), receiver);
-			break;
-			}*/
+/*		{
+			QMouseEvent* const mouseEvent =
+					static_cast<QMouseEvent*>(event);
+			QPoint pos = mouseEvent->globalPos();
+			DBG("Mouse event at %, % for %:%",
+					pos.x(), pos.y(),
+					receiver->metaObject()->className(),
+					receiver);
+		break;
+		}*/
 #endif
 		case QEvent::MouseMove:
 		default:
@@ -113,7 +119,8 @@ bool Application::notify(QObject * receiver, QEvent * event)
 		}
 		/*DBG("Event %:% for %:%",
 				event->type(), event,
-				receiver->metaObject()->className(), receiver);*/
+				receiver->metaObject()->className(),
+				receiver);*/
 		bool res = QApplication::notify(receiver, event);
 		//DBG("Res ", (res) ? "true" : "false");
 		return res;
