@@ -24,6 +24,8 @@ etch=4.0
 source /etc/lsb-release
 source config
 
+export QT_SELECT=qt5
+
 function exec_in_dir ()
 {
 	pushd $1 > /dev/null || exit $?
