@@ -43,6 +43,7 @@ void initRootPath(const char * args0)
 {
 	LOG("args0: ", args0);
 	QString cmd(QDir::fromNativeSeparators(args0));
+	LOG("cmd: ", cmd);
 
 	QString prefix(PREFIX);
 	LOG("Compile time prefix: ", prefix);
@@ -50,14 +51,15 @@ void initRootPath(const char * args0)
 	QString current(C_STR(QDir::currentPath()));
 	LOG("Current path: %", current);
 
-	QString path;
-	if(cmd.startsWith("/"))
+	Text path;
+	if(cmd.startsWith("/") ||
+			cmd.indexOf(":\\") == 1 ||
+			cmd.indexOf(":/") == 1)
 		path += cmd;
-	else if(!cmd.count("/")){
-		path += "/"; path += prefix; path += "bin/"; path += cmd;
-	}else{
-		path += current; path += "/"; path += cmd;
-	}
+	else if(cmd.count("/"))
+		path.catf("%/%", current, cmd);
+	else
+		path.catf("/%bin/%", prefix, cmd);
 	path = QDir::cleanPath(path);
 	int pos;
 	pos = path.lastIndexOf("/");
