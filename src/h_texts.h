@@ -82,6 +82,7 @@ inline Text & operator<<(Text & lhs, const bool & rhs) { lhs.append(rhs); return
 inline Text & operator<<(Text & lhs, const int & rhs) { lhs+=QString("%1").arg(rhs); return lhs; }
 inline Text & operator<<(Text & lhs, const unsigned & rhs) {lhs.append(rhs); return lhs;}
 inline Text & operator<<(Text & lhs, const double & rhs) { lhs+=QString("%1").arg(rhs); return lhs; }
+inline Text & operator<<(Text & lhs, const char * rhs) { lhs +=QString(rhs); return lhs; }
 inline Text & operator<<(Text & lhs, const QDateTime & rhs){lhs+=rhs.toString(); return lhs;}
 inline Text & operator<<(Text & lhs, const QString & rhs) {lhs.append(rhs); return lhs;}
 
