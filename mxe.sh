@@ -47,6 +47,8 @@ export PATH=${PWD}/${DISTRIB_CODENAME}-x-mxe/crosstools:$PATH
 	--libs=\\\"-lgnurx -lpq\\\" \
 	--ldflags=\\\"-static-libgcc -static-libstdc++\\\" \
 	--ldflags=-Wl,-subsystem,windows \
+	--statics=\\\"${TCROOT}/usr/i686-w64-mingw32.static/qt5/plugins/platforms/libqwindows.a\\\" \
+	--cflags=-DQT_STATICPLUGIN \
 	|| exit $?
 
 #--ldflags=-Wl,-subsystem,console

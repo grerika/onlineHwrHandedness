@@ -6,6 +6,8 @@
 #include <stdio.h>
 #include <QtGui>
 
+Q_IMPORT_PLUGIN(QWindowsIntegrationPlugin)
+
 #include "h_application.h"
 #include "h_mainview.h"
 

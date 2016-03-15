@@ -108,6 +108,9 @@ function process_args ()
 			(--static)
 				CONFIG="${CONFIG} staticbuild"
 			;;
+			(--statics)
+				STATICS="${STATICS} ${VALUE}"
+			;;
 			(--perfmode)
 				CFLAGS="${CFLAGS} -DPERFMODE"
 			;;
@@ -191,24 +194,32 @@ test "x${TARGET_ARCH}" = "x${HOST_ARCH}" && {
 	PKGCONFIG=${TARGET_ARCH}-pkg-config
 }
 
+
 #CFLAGS="${CFLAGS} $(${PKGCONFIG} --cflags QtCore)"
 #CFLAGS="${CFLAGS} $(${PKGCONFIG} --cflags Qt5Sql)" || exit $?
 CFLAGS="${CFLAGS} $(${PKGCONFIG} --cflags Qt5Gui)" || exit $?
 CFLAGS="${CFLAGS} $(${PKGCONFIG} --cflags Qt5Widgets)" || exit $?
 CFLAGS="${CFLAGS} $(${PKGCONFIG} --cflags Qt5Xml)" || exit $?
+#CFLAGS="${CFLAGS} $(${PKGCONFIG} --cflags Qt5WinExtras)" || exit $?
+CFLAGS="${CFLAGS} $(${PKGCONFIG} --cflags Qt5PlatformSupport)" || exit $?
 echo "${CONFIG}" | grep staticbuild > /dev/null && {
 #	STATICS+="${STATICS} $(${PKGCONFIG} --static --libs QtCore)" || exit $?
 #	STATICS+="${STATICS} $(${PKGCONFIG} --static --libs Qt5Sql)" || exit $?
 	STATICS+="${STATICS} $(${PKGCONFIG} --static --libs Qt5Gui)" || exit $?
 	STATICS+="${STATICS} $(${PKGCONFIG} --static --libs Qt5Widgets)" || exit $?
 	STATICS+="${STATICS} $(${PKGCONFIG} --static --libs Qt5Xml)" || exit $?
+#	STATICS+="${STATICS} $(${PKGCONFIG} --static --libs Qt5WinExtras)" || exit $?
+	STATICS+="${STATICS} $(${PKGCONFIG} --static --libs Qt5PlatformSupport)" || exit $?
 } || {
 #	LIBS+="${LIBS} $(${PKGCONFIG} --libs QtCore)" || exit $?
 #	LIBS+="${LIBS} $(${PKGCONFIG} --libs Qt5Sql)" || exit $?
 	LIBS+="${LIBS} $(${PKGCONFIG} --libs Qt5Gui)" || exit $?
 	LIBS+="${LIBS} $(${PKGCONFIG} --libs Qt5Widgets)" || exit $?
 	LIBS+="${LIBS} $(${PKGCONFIG} --libs Qt5Xml)" || exit $?
+#	LIBS+="${LIBS} $(${PKGCONFIG} --libs Qt5WinExtras)" || exit $?
+	LIBS+="${LIBS} $(${PKGCONFIG} --libs Qt5PlatformSupport)" || exit $?
 }
+
 
 LDFLAGS="${LDFLAGS} -Wl,--as-needed"
 
