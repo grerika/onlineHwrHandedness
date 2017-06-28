@@ -515,6 +515,7 @@ void MainView::clearAllOrientationSlot()
 void MainView::calcHandednessSlot()
 {
 	double uncertainty = uncertaintyEdit.text().toDouble();
+	clearAllOrientationSlot(); // clear orientations before calculation
 	if(0 <= uncertainty)
 		script.uncertainty = uncertainty;
 	script.calculateHandedness();

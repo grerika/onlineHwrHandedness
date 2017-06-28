@@ -252,7 +252,7 @@ void Script::setSampleId(QByteArray & data)
 		QDomNodeList strokeNodes = docElem.elementsByTagName("Form");
 		QDomAttr attr = strokeNodes.item(0).toElement().attributeNode("id");
 		if(attr.isNull())
-			sampleId = "Form element's id attirbute is empty";
+			sampleId = "Form element's id attribute is empty";
 		else
 			sampleId = attr.value();
 	}
